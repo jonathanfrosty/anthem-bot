@@ -1,0 +1,18 @@
+import { REACTIONS } from '../utilities/constants.js';
+
+export default {
+  name: 'resume',
+  aliases: ['unpause'],
+  description: 'Resumes the current song.',
+  options: {
+    requireBotConnection: true,
+    requireUserConnection: true,
+  },
+  execute: async ({ client, message }) => {
+    const player = client.players.get(message.guildId);
+
+    if (player?.resume()) {
+      message.react(REACTIONS.OK);
+    }
+  },
+};
