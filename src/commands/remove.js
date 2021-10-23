@@ -8,6 +8,7 @@ export default {
   options: {
     requireBotConnection: true,
     requireUserConnection: true,
+    requireBoundChannel: true,
   },
   execute: async ({ client, message, args }) => {
     const player = client.players.get(message.guildId);

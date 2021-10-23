@@ -8,6 +8,7 @@ export default {
   options: {
     requireBotConnection: true,
     requireUserConnection: true,
+    requireBoundChannel: true,
   },
   execute: async ({ client, message, args, guildConfig }) => {
     if (args.length > 0) {

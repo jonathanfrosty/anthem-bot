@@ -4,14 +4,20 @@ import { createAudioResource } from '@discordjs/voice';
 import { Constants } from 'discord.js';
 import { queuedEmbed, errorEmbed, playingEmbed, finishedEmbed } from '../utilities/embeds.js';
 
-const updatePlaying = async (song, channel, message = null) => {
+/**
+ * Update a channel periodically with the elapsed time of the current song,
+ * giving the effect of a real-time progress bar.
+ * Once the song finishes, update the message to reflect that.
+ * Abort updates if the message is deleted.
+ */
+const updatePlaying = async (song, channel, message) => {
   try {
     const player = channel.client.players.get(channel.guildId);
     if (player?.currentSong?.id === song.id) {
       const elapsedSeconds = player.getCurrentSongElapsedSeconds();
       const newContent = playingEmbed({ ...song, elapsedSeconds });
 
-      message = message === null
+      message = !message
         ? await channel.send(newContent)
         : await message.edit(newContent);
 
@@ -28,6 +34,9 @@ const updatePlaying = async (song, channel, message = null) => {
   }
 };
 
+/**
+ * Song class capable of generating an audio resource from a YouTube url.
+ */
 export default class Song {
   constructor({
     id, url, title, thumbnail, durationSeconds, onStart, onQueue, onError,
@@ -49,6 +58,9 @@ export default class Song {
     return resource;
   }
 
+  /**
+   * Create a Song object and link its callback methods to a given text channel.
+   */
   static create(video, channel) {
     const { url, title, thumbnail, durationSeconds } = video;
     const id = v4();
@@ -61,7 +73,7 @@ export default class Song {
       durationSeconds,
       onStart: () => updatePlaying({ id, url, title, thumbnail, durationSeconds }, channel),
       onQueue: (position, secondsUntil) => channel.send(queuedEmbed(url, title, thumbnail, position, secondsUntil)),
-      onError: (error) => { channel.send(errorEmbed({ message: `Failed to play \`${title}\`` })); console.warn(error); },
+      onError: () => channel.send(errorEmbed({ message: `Failed to play \`${title}\`` })),
     });
   }
 }

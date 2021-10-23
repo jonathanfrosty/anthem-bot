@@ -1,7 +1,17 @@
+import { Permissions } from 'discord.js';
 import { DEFAULT_PREFIX, DEFAULT_VOLUME, REACTIONS } from '../utilities/constants.js';
 import { errorEmbed } from '../utilities/embeds.js';
-import { BotNotConnectedException, UserNotConnectedException } from '../utilities/exceptions.js';
+import {
+  BotNotConnectedException,
+  BotPermissionsException,
+  UnboundChannelException,
+  UserNotConnectedException,
+  UserPermissionsException,
+} from '../utilities/exceptions.js';
 
+/**
+ * Get a matching command by name or any aliases.
+ */
 const getCommand = (client, firstArg, prefix) => {
   if (!firstArg.startsWith(prefix)) return null;
 
@@ -9,21 +19,60 @@ const getCommand = (client, firstArg, prefix) => {
   return client.commands.get(command) || client.commands.find((cmd) => cmd.aliases?.includes(command));
 };
 
+/**
+ * Retrieve the store object for a given guild if it exists; otherwise, set and return a default.
+ */
 const getGuildConfig = async (client, guildId) => {
   if (!await client.db.has(guildId)) {
     await client.db.set(guildId, {
       prefix: DEFAULT_PREFIX,
       volume: DEFAULT_VOLUME,
+      boundChannel: null,
     });
   }
 
   return client.db.get(guildId);
 };
 
-export default async (client, message) => {
-  const { content, guildId, channel, member: { user, voice } } = message;
+/**
+ * Validate the bot, user, channel, and command when applicable.
+ */
+const validate = (client, guildConfig, command, { guildId, channel, member }) => {
+  // check if the bot has permission to use the text channel
+  if (!channel.permissionsFor(client.user).has([Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES])) {
+    throw new BotPermissionsException();
+  }
 
-  if (user.bot) return;
+  // check if using the bound channel
+  if (command.options.requireBoundChannel && guildConfig.boundChannel !== null && guildConfig.boundChannel !== channel.id) {
+    throw new UnboundChannelException(guildConfig);
+  }
+
+  // check if the user has permission to execute the command
+  if (command.options.permissions && !channel.permissionsFor(member.user).has(command.options.permissions)) {
+    throw new UserPermissionsException();
+  }
+
+  // check if the user is connected to a voice channel
+  if (command.options.requireUserConnection && !member.voice.channel) {
+    throw new UserNotConnectedException();
+  }
+
+  // check if the bot is connected to a voice channel
+  if (command.options.requireBotConnection && !client.players.has(guildId)) {
+    throw new BotNotConnectedException();
+  }
+};
+
+/**
+ * Event handler for when any message is sent by a user.
+ * If the message is a valid command, attempt to execute it.
+ * Send a message back and react to the user message to indicate either success or failure.
+ */
+export default async (client, message) => {
+  const { content, guildId, channel, member } = message;
+
+  if (member.user.bot) return;
 
   try {
     const [firstArg, ...args] = content.split(' ');
@@ -32,13 +81,7 @@ export default async (client, message) => {
 
     if (!command) return;
 
-    if (command.options.requireUserConnection && !voice.channel) {
-      throw new UserNotConnectedException();
-    }
-
-    if (command.options.requireBotConnection && !client.players.has(guildId)) {
-      throw new BotNotConnectedException();
-    }
+    validate(client, guildConfig, command, message);
 
     await command.execute({ client, message, args, guildConfig });
   } catch (error) {

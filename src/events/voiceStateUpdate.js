@@ -1,3 +1,7 @@
+/**
+ * Event handler for when any voice state update occurs within a voice channel.
+ * Used to disconnect the bot from a voice channel in the event that there are no other users in it.
+ */
 export default async (client, oldState, newState) => {
   const { member, channelId, guild } = oldState;
 

@@ -29,7 +29,8 @@ export const queuedEmbed = (url, title, thumbnail, position, secondsUntil) => {
 };
 
 export const playlistEmbed = (songs) => {
-  const description = `${songs.slice(0, PAGE_SIZE).map(({ title, url }) => `[${title}](${url})`).join('\n')}\n...and ${songs.length - PAGE_SIZE} more`;
+  const songList = songs.slice(0, PAGE_SIZE).map(({ title, url }) => `[${title}](${url})`).join('\n');
+  const description = `${songList}\n...and ${songs.length - PAGE_SIZE} more`;
   const fields = [
     { name: 'Total duration', value: `\`${formatTime(songs.reduce((total, video) => total + video.durationSeconds, 0))}\`` },
   ];
@@ -56,7 +57,9 @@ export const errorEmbed = ({ name = 'An error occurred', message }) => ({
   ],
 });
 
-export const listEmbeds = (title, items = []) => {
+export const listEmbeds = (items = []) => {
+  const title = 'Queue';
+
   if (items.length === 0) {
     return [createEmbed({ colour: 'PURPLE', title: `🎶   ${title}`, description: `${title} is empty.` })];
   }
@@ -100,15 +103,14 @@ export const anthemEmbed = () => ({
     createEmbed({
       colour: '#e34234',
       title: '🎵   Anthem has joined!   🎵',
-      description: `Anthem is a simple bot for playing YouTube audio.\n\nUse the \`${DEFAULT_PREFIX}}help\` command for a list of supported commands.`,
+      description: `Anthem is a simple bot for playing YouTube audio.\n\nType **\`${DEFAULT_PREFIX}help\`** for a list of supported commands.`,
     }),
   ],
 });
 
-const createEmbed = ({ colour = 'BLUE', title, url, description = '', thumbnail = '', fields = [], footer = '' }) => new MessageEmbed()
+const createEmbed = ({ colour = 'BLUE', title, description = '', thumbnail = '', fields = [], footer = '' }) => new MessageEmbed()
   .setColor(colour)
   .setTitle(title)
-  .setURL(url)
   .setDescription(description)
   .setThumbnail(thumbnail)
   .addFields(fields)

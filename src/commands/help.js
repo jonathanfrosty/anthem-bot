@@ -7,6 +7,7 @@ export default {
   options: {
     requireBotConnection: false,
     requireUserConnection: false,
+    requireBoundChannel: true,
   },
   execute: async ({ client, message, guildConfig }) => {
     const embed = commandsEmbed(client.commands, guildConfig.prefix);

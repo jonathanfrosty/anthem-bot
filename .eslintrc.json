@@ -12,14 +12,15 @@
   },
   "rules": {
     "linebreak-style": 0,
-    "max-len": ["error", { "code": 150 }],
     "no-param-reassign": 0,
     "no-use-before-define": 0,
     "no-console": 0,
     "no-plusplus": 0,
     "no-new": 0,
     "import/extensions": 0,
-    "object-curly-newline": ["error", { "ImportDeclaration": { "multiline": true } }],
-    "import/no-dynamic-require": 0
+    "import/no-dynamic-require": 0,
+    "max-classes-per-file": 0,
+    "max-len": ["error", { "code": 150 }],
+    "object-curly-newline": ["error", { "ImportDeclaration": { "multiline": true } }]
   }
 }

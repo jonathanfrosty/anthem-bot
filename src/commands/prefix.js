@@ -9,6 +9,7 @@ export default {
   options: {
     requireBotConnection: false,
     requireUserConnection: false,
+    requireBoundChannel: true,
   },
   execute: async ({ client, message, args, guildConfig }) => {
     const prefix = args[0]?.toString();

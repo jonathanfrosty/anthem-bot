@@ -6,6 +6,10 @@ import {
   VoiceConnectionStatus,
 } from '@discordjs/voice';
 
+/**
+ * Player class that manages individual connections to voice channels and controls any audio playing over it.
+ * One Player per voice channel.
+ */
 export default class Player {
   constructor(voiceConnection, guildConfig) {
     this.voiceConnection = voiceConnection;
@@ -17,6 +21,7 @@ export default class Player {
     this.seeking = false;
     this.queue = [];
 
+    // handle connects and disconnects experienced by the voice connection
     this.voiceConnection.on('stateChange', async (_, newState) => {
       if (newState.status === VoiceConnectionStatus.Disconnected) {
         if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -41,6 +46,7 @@ export default class Player {
       }
     });
 
+    // handle state changes of the audio player to either begin playing a song or process the next song in the queue
     this.audioPlayer.on('stateChange', (oldState, newState) => {
       if (oldState.status !== AudioPlayerStatus.Idle && newState.status === AudioPlayerStatus.Idle) {
         this.currentSong = null;
@@ -55,16 +61,23 @@ export default class Player {
       }
     });
 
-    this.audioPlayer.on('error', (error) => this.handleError(error, this.seekSeconds));
+    // handle errors experienced by the audio player
+    this.audioPlayer.on('error', (error) => this.handleError(error, this.getCurrentSongElapsedSeconds()));
 
     this.voiceConnection.subscribe(this.audioPlayer);
   }
 
+  /**
+   * Return whether or not the bot is connected to a voice channel.
+   */
   isConnected() {
     const { status } = this.voiceConnection.state;
     return status !== VoiceConnectionStatus.Destroyed && status !== VoiceConnectionStatus.Disconnected;
   }
 
+  /**
+   * Disconnect the bot from the voice channel, if it was connected.
+   */
   leave() {
     if (this.isConnected()) {
       this.voiceConnection.destroy();
@@ -73,14 +86,23 @@ export default class Player {
     return false;
   }
 
+  /**
+   * Pause the current song if there is one playing.
+   */
   pause() {
     return this.audioPlayer.pause();
   }
 
+  /**
+   * Resume the current song if it was paused.
+   */
   resume() {
     return this.audioPlayer.unpause();
   }
 
+  /**
+   * Return information about the current song.
+   */
   nowPlaying() {
     return {
       ...this.currentSong,
@@ -88,6 +110,9 @@ export default class Player {
     };
   }
 
+  /**
+   * Remove a song from the queue at a given position, provided it is valid.
+   */
   remove(position) {
     if (
       position
@@ -100,10 +125,16 @@ export default class Player {
     return false;
   }
 
+  /**
+   * Skip the current song and move onto the next one in the queue by default.
+   * If @param position is provided and valid, this will skip to the song at that position in the queue,
+   * thereby removing all songs up to that position.
+   */
   skip(position) {
     if (position) {
       if (
         !Number.isNaN(+position)
+        && Number.isInteger(+position)
         && position > 0
         && position <= this.queue.length
       ) {
@@ -115,15 +146,25 @@ export default class Player {
     return this.stop();
   }
 
+  /**
+   * Stop playing the current song.
+   * This will cause the next song in the queue to be processed.
+   */
   stop() {
     this.currentSong = null;
     return this.audioPlayer.stop(true);
   }
 
+  /**
+   * Remove all songs from the queue.
+   */
   clear() {
     this.queue = [];
   }
 
+  /**
+   * Go to a given timestamp in the current song, provided it is within the bounds of its duration.
+   */
   seek(seconds) {
     if (
       seconds !== undefined
@@ -140,6 +181,9 @@ export default class Player {
     return false;
   }
 
+  /**
+   * Set the volume of the audio resource given a percentage value.
+   */
   setVolume(value) {
     if (
       value !== undefined
@@ -154,6 +198,10 @@ export default class Player {
     return null;
   }
 
+  /**
+   * Push a song onto the queue, or to the front of the queue if @param forceNext is true.
+   * If the queue is empty, attempt to process the song immediately.
+   */
   enqueue(songs, forceNext) {
     let position;
 
@@ -175,6 +223,9 @@ export default class Player {
     }
   }
 
+  /**
+   * Process the next song in the queue if there is one, and only if the audio player is inactive.
+   */
   processQueue() {
     if (this.audioPlayer.state.status !== AudioPlayerStatus.Idle || this.queue.length === 0) {
       return;
@@ -184,6 +235,10 @@ export default class Player {
     this.play();
   }
 
+  /**
+   * Begin playing a song from a given timestamp.
+   * Will attempt to retry in the case of any errors during this process.
+   */
   play(startSeconds = 0, retryCount = 0) {
     try {
       this.audioResource = this.currentSong.createAudioResource(startSeconds, this.volume);
@@ -193,21 +248,31 @@ export default class Player {
     }
   }
 
+  /**
+   * Handle any errors thrown whilst attempting to play an audio resource.
+   * If retries are unsuccessful, trigger an error and move onto the next song in the queue.
+   */
   handleError(error, startSeconds, retryCount = 0) {
     if (retryCount < 2) {
-      console.warn(`Error playing ${this.currentSong?.title}\nRetrying... (${++retryCount})`);
+      console.warn(`Error playing ${this.currentSong?.title}\nRetrying... (${++retryCount})\n`, error);
       this.play(startSeconds, retryCount);
     } else {
-      this.currentSong.onError(error);
+      this.currentSong.onError();
       this.processQueue();
     }
   }
 
+  /**
+   * Calculate the number of seconds until a song at a given position in the queue will be played.
+   */
   calculateSecondsUntil(position) {
     const currentSongRemainingSeconds = this.currentSong.durationSeconds - this.getCurrentSongElapsedSeconds();
     return this.queue.reduce((total, song, i) => ((i < position - 1) ? total + song.durationSeconds : total), currentSongRemainingSeconds);
   }
 
+  /**
+   * Get the number of seconds that the current song has been playing for.
+   */
   getCurrentSongElapsedSeconds() {
     const elapsedSeconds = (this.audioResource?.playbackDuration ?? 0) / 1000;
     return elapsedSeconds + this.seekSeconds;

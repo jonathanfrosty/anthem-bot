@@ -9,6 +9,7 @@ export default {
   options: {
     requireBotConnection: false,
     requireUserConnection: true,
+    requireBoundChannel: true,
   },
   execute: async ({ client, message, guildConfig }) => {
     const { guildId, member: { voice: { channel } } } = message;

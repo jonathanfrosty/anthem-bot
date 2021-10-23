@@ -14,7 +14,7 @@ export const REACTIONS = {
 
 export const PAGE_SIZE = 10;
 
-export const DEFAULT_VOLUME = 0.15;
+export const DEFAULT_VOLUME = 0.2;
 
 export const DEFAULT_PREFIX = '!';
 
@@ -33,6 +33,7 @@ export const COMMANDS_ORDER = [
   'clear',
   'join',
   'leave',
+  'bind',
   'prefix',
   'help',
 ];
