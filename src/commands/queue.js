@@ -1,3 +1,4 @@
+import { Constants } from 'discord.js';
 import { REACTIONS } from '../utilities/constants.js';
 import { listEmbeds } from '../utilities/embeds.js';
 
@@ -42,7 +43,11 @@ const showList = async (queue, channel) => {
     });
 
     collector.on('end', () => {
-      message?.reactions.removeAll();
+      message?.reactions.removeAll().catch((error) => {
+        if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+          console.warn(error);
+        }
+      });
     });
   }
 };
