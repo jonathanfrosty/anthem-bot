@@ -19,15 +19,18 @@ export default class Player {
     this.volume = guildConfig.volume;
     this.seekSeconds = 0;
     this.seeking = false;
+    this.retryCount = 0;
     this.queue = [];
 
     // handle connects and disconnects experienced by the voice connection
     this.voiceConnection.on('stateChange', async (_, newState) => {
       if (newState.status === VoiceConnectionStatus.Disconnected) {
         if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
-          this.voiceConnection.destroy();
-        } else {
-          this.voiceConnection.destroy();
+          try {
+            await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5e3);
+          } catch {
+            this.leave();
+          }
         }
       } else if (newState.status === VoiceConnectionStatus.Destroyed) {
         this.stop();
@@ -37,32 +40,42 @@ export default class Player {
       ) {
         this.readyLock = true;
         try {
-          await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20_000);
+          await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
         } catch {
-          if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+          if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
+            this.leave();
+          }
         } finally {
           this.readyLock = false;
         }
       }
     });
 
-    // handle state changes of the audio player to either begin playing a song or process the next song in the queue
-    this.audioPlayer.on('stateChange', (oldState, newState) => {
-      if (oldState.status !== AudioPlayerStatus.Idle && newState.status === AudioPlayerStatus.Idle) {
-        this.currentSong = null;
-        this.seekSeconds = 0;
-        this.processQueue();
-      } else if (oldState.status !== AudioPlayerStatus.Paused && newState.status === AudioPlayerStatus.Playing) {
-        if (this.seeking) {
-          this.seeking = false;
-        } else {
-          this.currentSong?.onStart();
+    this.audioPlayer
+      .on(AudioPlayerStatus.Idle, async (oldState) => {
+        // when the player finishes playing a song
+        if (oldState.status !== AudioPlayerStatus.Idle) {
+          await this.currentSong.onFinish();
+          this.currentSong = null;
+          this.audioResource = null;
+          this.seekSeconds = 0;
+          this.retryCount = 0;
+          this.processQueue();
         }
-      }
-    });
-
-    // handle errors experienced by the audio player
-    this.audioPlayer.on('error', (error) => this.handleError(error, this.getCurrentSongElapsedSeconds()));
+      })
+      .on(AudioPlayerStatus.Playing, (oldState) => {
+        // when the player starts (not resumes) playing a song
+        if (oldState.status !== AudioPlayerStatus.Paused) {
+          if (this.seeking) {
+            this.seeking = false;
+          } else {
+            this.currentSong?.onStart();
+          }
+        }
+      })
+      .on('error', (error) => {
+        this.handleError(error, this.getCurrentSongElapsedSeconds());
+      });
 
     this.voiceConnection.subscribe(this.audioPlayer);
   }
@@ -151,7 +164,6 @@ export default class Player {
    * This will cause the next song in the queue to be processed.
    */
   stop() {
-    this.currentSong = null;
     return this.audioPlayer.stop(true);
   }
 
@@ -239,12 +251,12 @@ export default class Player {
    * Begin playing a song from a given timestamp.
    * Will attempt to retry in the case of any errors during this process.
    */
-  play(startSeconds = 0, retryCount = 0) {
+  play(startSeconds = 0) {
     try {
       this.audioResource = this.currentSong.createAudioResource(startSeconds, this.volume);
       this.audioPlayer.play(this.audioResource);
     } catch (error) {
-      this.handleError(error, startSeconds, retryCount);
+      this.handleError(error, startSeconds);
     }
   }
 
@@ -252,13 +264,17 @@ export default class Player {
    * Handle any errors thrown whilst attempting to play an audio resource.
    * If retries are unsuccessful, trigger an error and move onto the next song in the queue.
    */
-  handleError(error, startSeconds, retryCount = 0) {
-    if (retryCount < 2) {
-      console.warn(`Error playing ${this.currentSong?.title}\nRetrying... (${++retryCount})\n`, error);
-      this.play(startSeconds, retryCount);
+  handleError(error, startSeconds) {
+    if (this.retryCount < 2) {
+      console.warn(`Error playing "${this.currentSong?.title}"\nRetrying... (${++this.retryCount})\n`, error);
+      if (startSeconds > 0) {
+        this.seek(startSeconds);
+      } else {
+        this.play();
+      }
     } else {
-      this.currentSong.onError();
-      this.processQueue();
+      this.currentSong.error = true;
+      this.stop();
     }
   }
 

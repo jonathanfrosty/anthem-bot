@@ -5,53 +5,21 @@ import { Constants } from 'discord.js';
 import { queuedEmbed, errorEmbed, playingEmbed, finishedEmbed } from '../utilities/embeds.js';
 
 /**
- * Update a channel periodically with the elapsed time of the current song,
- * giving the effect of a real-time progress bar.
- * Once the song finishes, update the message to reflect that.
- * Abort updates if the message is deleted.
- */
-const updatePlaying = async (song, channel, message) => {
-  try {
-    const player = channel.client.players.get(channel.guildId);
-    if (player?.currentSong?.id === song.id) {
-      const elapsedSeconds = player.getCurrentSongElapsedSeconds();
-      const newContent = playingEmbed({ ...song, elapsedSeconds });
-
-      message = !message
-        ? await channel.send(newContent)
-        : await message.edit(newContent);
-
-      if (!message.deleted) {
-        setTimeout(() => updatePlaying(song, channel, message), 5000);
-      }
-    } else {
-      await message?.edit(finishedEmbed(song));
-    }
-  } catch (error) {
-    if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
-      console.warn(error);
-    }
-  }
-};
-
-/**
  * Song class capable of generating an audio resource from a YouTube url.
+ * Assigned a channel that it will send updates to.
  */
 export default class Song {
-  constructor({
-    id, url, title, thumbnail, durationSeconds, onStart, onQueue, onError,
-  }) {
+  constructor({ id, url, title, thumbnail, durationSeconds, channel }) {
     this.id = id;
     this.url = url;
     this.title = title;
     this.thumbnail = thumbnail;
     this.durationSeconds = durationSeconds;
-    this.onStart = onStart;
-    this.onQueue = onQueue;
-    this.onError = onError;
+    this.channel = channel;
+    this.error = false;
   }
 
-  createAudioResource(startSeconds = 0, volume) {
+  createAudioResource(startSeconds, volume) {
     const stream = ytdl(this.url, { opusEncoded: true, seek: startSeconds, filter: 'audioonly', highWaterMark: 2 ** 25 });
     const resource = createAudioResource(stream, { inlineVolume: true });
     resource.volume.setVolume(volume);
@@ -59,21 +27,60 @@ export default class Song {
   }
 
   /**
+   * Update the channel periodically with the elapsed time of the current song,
+   * giving the effect of a real-time progress bar.
+   * Once the song finishes successfully or the player disconnects, delete the message.
+   * Abort updates if the message is deleted.
+   */
+  async onStart(message = null) {
+    try {
+      const player = this.channel.client.players.get(this.channel.guildId);
+
+      if (player?.isConnected() && player?.currentSong?.id === this.id) {
+        const elapsedSeconds = player.getCurrentSongElapsedSeconds();
+        const newContent = playingEmbed({ ...this, elapsedSeconds });
+
+        message = !message
+          ? await this.channel.send(newContent)
+          : await message.edit(newContent);
+
+        setTimeout(() => this.onStart(message), 5e3);
+      } else {
+        await message?.delete();
+      }
+    } catch (error) {
+      if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+        console.warn(error);
+      }
+    }
+  }
+
+  async onFinish() {
+    const embed = this.error
+      ? errorEmbed({ message: `Failed to play \`${this.title}\`` })
+      : finishedEmbed(this.url, this.title, this.thumbnail);
+
+    return this.channel.send(embed);
+  }
+
+  async onQueue(position, secondsUntil) {
+    const embed = queuedEmbed(this.url, this.title, this.thumbnail, position, secondsUntil);
+    return this.channel.send(embed);
+  }
+
+  /**
    * Create a Song object and link its callback methods to a given text channel.
    */
   static create(video, channel) {
     const { url, title, thumbnail, durationSeconds } = video;
-    const id = v4();
 
     return new Song({
-      id,
+      id: v4(),
       url,
       title,
       thumbnail,
       durationSeconds,
-      onStart: () => updatePlaying({ id, url, title, thumbnail, durationSeconds }, channel),
-      onQueue: (position, secondsUntil) => channel.send(queuedEmbed(url, title, thumbnail, position, secondsUntil)),
-      onError: () => channel.send(errorEmbed({ message: `Failed to play \`${title}\`` })),
+      channel,
     });
   }
 }

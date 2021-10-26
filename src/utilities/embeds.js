@@ -14,7 +14,7 @@ export const playingEmbed = ({ url, title, thumbnail, durationSeconds, elapsedSe
   return { embeds: [createEmbed({ title: '🎵   Now playing', description, thumbnail, fields })] };
 };
 
-export const finishedEmbed = ({ url, title, thumbnail }) => {
+export const finishedEmbed = (url, title, thumbnail) => {
   const description = `[${title}](${url})`;
   return { embeds: [createEmbed({ colour: 'GREEN', title: '✅   Finished playing', description, thumbnail })] };
 };
@@ -30,10 +30,11 @@ export const queuedEmbed = (url, title, thumbnail, position, secondsUntil) => {
 
 export const playlistEmbed = (songs) => {
   const songList = songs.slice(0, PAGE_SIZE).map(({ title, url }) => `[${title}](${url})`).join('\n');
-  const description = `${songList}\n...and ${songs.length - PAGE_SIZE} more`;
+  const description = songs.length > PAGE_SIZE ? `${songList}\n...and ${songs.length - PAGE_SIZE} more` : songList;
   const fields = [
     { name: 'Total duration', value: `\`${formatTime(songs.reduce((total, video) => total + video.durationSeconds, 0))}\`` },
   ];
+
   return {
     embeds: [
       createEmbed({

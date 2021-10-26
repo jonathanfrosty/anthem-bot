@@ -34,11 +34,12 @@ export default {
 
       const videos = await search(args);
       const songs = videos.map((video) => Song.create(video, channel));
-      player.enqueue(songs, true);
 
       if (songs.length > 1) {
         await channel.send(playlistEmbed(songs));
       }
+
+      player.enqueue(songs, true);
     } else {
       throw new InvalidCommandException(guildConfig.prefix);
     }
