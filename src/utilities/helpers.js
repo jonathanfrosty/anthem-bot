@@ -60,6 +60,23 @@ export const getProgressBar = (elapsed, total) => {
 };
 
 /**
+ * Get the number of seconds from a string of the form "mm:ss", ensuring it is within the given range.
+ * For example, "12:42" (12 minutes 42 seconds).
+ */
+export const getSeekSeconds = (string, maxSeconds) => {
+  const rgx = /(\d*):(\d*)/;
+  const [, mins, secs] = rgx.exec(string);
+
+  if (!mins) return null;
+
+  const seconds = (+mins * 60) + +secs;
+
+  if (seconds < 0 || seconds > maxSeconds) return null;
+
+  return seconds;
+};
+
+/**
  * Retrieve YouTube video(s) given either a valid video url, playlist url, or plain text to search YouTube for a video.
  * Will attempt to retry in the case of any errors during this process.
  */

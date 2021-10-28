@@ -3,8 +3,8 @@ import { InvalidCommandException } from '../utilities/exceptions.js';
 
 export default {
   name: 'seek',
-  parameters: '<seconds>',
-  description: 'Moves to a time in the current song.\nProvide a number of seconds.',
+  parameters: '<seconds | mm:ss>',
+  description: 'Moves to a time in the current song.\nProvide a number of seconds or a timestamp of the correct form.',
   options: {
     requireBotConnection: true,
     requireUserConnection: true,

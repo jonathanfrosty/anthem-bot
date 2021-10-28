@@ -5,6 +5,7 @@ import {
   VoiceConnectionDisconnectReason,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
+import { getSeekSeconds } from '../utilities/helpers.js';
 
 /**
  * Player class that manages individual connections to voice channels and controls any audio playing over it.
@@ -177,18 +178,22 @@ export default class Player {
   /**
    * Go to a given timestamp in the current song, provided it is within the bounds of its duration.
    */
-  seek(seconds) {
-    if (
-      seconds !== undefined
-      && this.currentSong
-      && !Number.isNaN(+seconds)
-      && seconds >= 0
-      && seconds < this.currentSong.durationSeconds
-    ) {
-      this.seeking = true;
-      this.seekSeconds = +seconds;
-      this.play(this.seekSeconds);
-      return true;
+  seek(value) {
+    if (value !== undefined && this.currentSong) {
+      let seconds = null;
+
+      if (!Number.isNaN(+value) && value >= 0 && value < this.currentSong.durationSeconds) {
+        seconds = +value;
+      } else if (value.includes(':')) {
+        seconds = getSeekSeconds(value, this.currentSong.durationSeconds);
+      }
+
+      if (seconds !== null) {
+        this.seeking = true;
+        this.seekSeconds = seconds;
+        this.play(this.seekSeconds);
+        return true;
+      }
     }
     return false;
   }
