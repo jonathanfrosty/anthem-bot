@@ -104,7 +104,11 @@ export const anthemEmbed = () => ({
     createEmbed({
       colour: '#e34234',
       title: '🎵   Anthem has joined!   🎵',
-      description: `Anthem is a simple bot for playing YouTube audio.\n\nType **\`${DEFAULT_PREFIX}help\`** for a list of supported commands.`,
+      description: `
+        Anthem is a simple bot for playing YouTube audio.\n
+        Check out the source code or report any issues [here](https://github.com/jonathanfrosty/anthem-bot).\n
+        Type **\`${DEFAULT_PREFIX}help\`** for a list of supported commands.
+      `,
     }),
   ],
 });
