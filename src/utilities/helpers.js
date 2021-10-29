@@ -86,7 +86,8 @@ export const search = async (args, retryCount = 0) => {
 
   try {
     if (!isValidUrl(firstArg)) { // youtube search terms
-      videos[0] = await youtube.searchVideos(args.join(' '));
+      const encodedSearchTerms = encodeURIComponent(args.join(' '));
+      videos[0] = await youtube.searchVideos(encodedSearchTerms);
     } else if (firstArg.includes('list=')) { // playlist url
       videos = await youtube.getPlaylist(firstArg);
     } else { // single video url
