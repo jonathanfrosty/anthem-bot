@@ -1,3 +1,4 @@
+import { Permissions } from 'discord.js';
 import { anthemEmbed } from '../utilities/embeds.js';
 
 /**
