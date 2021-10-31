@@ -15,8 +15,8 @@ export default {
     requireUserConnection: true,
     requireBoundChannel: true,
   },
-  execute: async ({ client, message, args, guildConfig }) => {
-    const { guildId, channel, member: { voice } } = message;
+  execute: async ({ client, message, command, args, guildConfig }) => {
+    const { guildId, channel, member: { voice }, content } = message;
 
     if (args.length > 0) {
       let player = client.players.get(guildId);
@@ -41,7 +41,7 @@ export default {
 
       player.enqueue(songs, true);
     } else {
-      throw new InvalidCommandException(guildConfig.prefix);
+      throw new InvalidCommandException(content.split(' ')[0], command.parameters, guildConfig.prefix);
     }
   },
 };

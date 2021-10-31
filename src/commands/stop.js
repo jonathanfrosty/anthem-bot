@@ -11,7 +11,7 @@ export default {
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
 
-    if (player?.stop()) {
+    if (player.stop()) {
       message.react(REACTIONS.OK);
     }
   },

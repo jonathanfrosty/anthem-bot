@@ -83,7 +83,7 @@ export default async (client, message) => {
 
     validate(client, guildConfig, command, message);
 
-    await command.execute({ client, message, args, guildConfig });
+    await command.execute({ client, message, command, args, guildConfig });
   } catch (error) {
     channel.send((errorEmbed(error)));
     message.react(REACTIONS.FAIL);

@@ -12,7 +12,7 @@ export default {
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
 
-    if (player?.leave()) {
+    if (player.leave()) {
       client.players.delete(message.guildId);
       message.react(REACTIONS.SAD);
     }

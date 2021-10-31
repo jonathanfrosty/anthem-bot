@@ -1,6 +1,6 @@
-import { Constants } from 'discord.js';
-import { REACTIONS } from '../utilities/constants.js';
-import { listEmbeds } from '../utilities/embeds.js';
+import { createActionRow } from '../utilities/buttons.js';
+import { BUTTONS } from '../utilities/constants.js';
+import { queueEmbeds } from '../utilities/embeds.js';
 
 export default {
   name: 'queue',
@@ -13,41 +13,39 @@ export default {
   },
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
-    showList(player?.queue, message.channel);
+    const embeds = queueEmbeds(player.queue);
+    showQueue(embeds, message.channel);
   },
 };
 
 /**
- * Send a message to a given channel displaying a paginated queue that users can click through for a short time.
+ * Send a message to a channel displaying a paginated queue that users can click through for a short time.
  */
-const showList = async (queue, channel) => {
+const showQueue = async (embeds, channel) => {
   let page = 0;
 
-  const embeds = listEmbeds(queue);
-  const message = await channel.send({ embeds: [embeds[0]] });
+  if (embeds.length === 1) {
+    channel.send({ embeds: [embeds[0]] });
+  } else {
+    let actionRow = createActionRow(BUTTONS.PREVIOUS, BUTTONS.NEXT);
+    actionRow.components.at(0).setDisabled(true);
+    const message = await channel.send({ embeds: [embeds[0]], components: [actionRow] });
 
-  if (embeds.length > 1) {
-    message.react(REACTIONS.LEFT);
-    message.react(REACTIONS.RIGHT);
+    const filter = (i) => i.customId === BUTTONS.PREVIOUS || i.customId === BUTTONS.NEXT;
+    const collector = message.createMessageComponentCollector({ filter, time: 5e3 });
 
-    const filter = (reaction, user) => !user.bot && (reaction.emoji.name === REACTIONS.LEFT || reaction.emoji.name === REACTIONS.RIGHT);
-    const collector = message.createReactionCollector({ filter, time: 60e3 });
+    collector.on('collect', async (interaction) => {
+      actionRow = createActionRow(BUTTONS.PREVIOUS, BUTTONS.NEXT);
 
-    collector.on('collect', (reaction, user) => {
-      reaction.users.remove(user.id);
-      if (reaction.emoji.name === REACTIONS.LEFT && page > 0) {
-        message.edit({ embeds: [embeds[--page]] });
-      } else if (reaction.emoji.name === REACTIONS.RIGHT && page < embeds.length - 1) {
-        message.edit({ embeds: [embeds[++page]] });
+      if (interaction.customId === BUTTONS.PREVIOUS && --page === 0) {
+        actionRow.components.at(0).setDisabled(true);
       }
-    });
 
-    collector.on('end', () => {
-      message?.reactions.removeAll().catch((error) => {
-        if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
-          console.warn(error);
-        }
-      });
+      if (interaction.customId === BUTTONS.NEXT && ++page === embeds.length - 1) {
+        actionRow.components.at(1).setDisabled(true);
+      }
+
+      await interaction.update({ embeds: [embeds[page]], components: [actionRow] });
     });
   }
 };

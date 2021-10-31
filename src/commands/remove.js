@@ -1,4 +1,5 @@
 import { REACTIONS } from '../utilities/constants.js';
+import { InvalidCommandException } from '../utilities/exceptions.js';
 
 export default {
   name: 'remove',
@@ -10,11 +11,15 @@ export default {
     requireUserConnection: true,
     requireBoundChannel: true,
   },
-  execute: async ({ client, message, args }) => {
-    const player = client.players.get(message.guildId);
+  execute: async ({ client, message, command, args, guildConfig }) => {
+    if (args.length > 0) {
+      const player = client.players.get(message.guildId);
 
-    if (player?.remove(args[0])) {
-      message.react(REACTIONS.OK);
+      if (player.remove(args[0])) {
+        message.react(REACTIONS.OK);
+      }
+    } else {
+      throw new InvalidCommandException(message.content.split(' ')[0], command.parameters, guildConfig.prefix);
     }
   },
 };

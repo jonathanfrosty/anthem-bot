@@ -12,7 +12,7 @@ export default {
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
 
-    if (player?.resume()) {
+    if (player.resume()) {
       message.react(REACTIONS.OK);
     }
   },

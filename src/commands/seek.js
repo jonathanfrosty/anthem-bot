@@ -10,15 +10,15 @@ export default {
     requireUserConnection: true,
     requireBoundChannel: true,
   },
-  execute: async ({ client, message, args, guildConfig }) => {
+  execute: async ({ client, message, command, args, guildConfig }) => {
     if (args.length > 0) {
       const player = client.players.get(message.guildId);
 
-      if (player?.seek(args[0])) {
+      if (player.seek(args[0])) {
         message.react(REACTIONS.OK);
       }
     } else {
-      throw new InvalidCommandException(guildConfig.prefix);
+      throw new InvalidCommandException(message.content.split(' ')[0], command.parameters, guildConfig.prefix);
     }
   },
 };

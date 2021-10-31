@@ -12,7 +12,7 @@ export default {
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
 
-    if (player?.currentSong) {
+    if (player.currentSong) {
       const embed = playingEmbed({ ...player.currentSong, showDuration: false });
       message.channel.send(embed);
     }

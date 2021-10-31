@@ -39,7 +39,7 @@ export const playlistEmbed = (songs) => {
     embeds: [
       createEmbed({
         colour: 'BLURPLE',
-        title: `🎶   Playlist of ${songs.length} songs`,
+        title: `🎶   Playlist of ${songs.length} songs added`,
         description,
         thumbnail: songs[0].thumbnail,
         fields,
@@ -58,7 +58,7 @@ export const errorEmbed = ({ name = 'An error occurred', message }) => ({
   ],
 });
 
-export const listEmbeds = (items = []) => {
+export const queueEmbeds = (items = []) => {
   const title = 'Queue';
 
   if (items.length === 0) {

@@ -1,7 +1,7 @@
 export class InvalidCommandException {
-  constructor(prefix) {
+  constructor(command, parameters, prefix) {
     this.name = 'Invalid command usage';
-    this.message = `Type **\`${prefix}help\`** for a list of supported commands.`;
+    this.message = `**\`${command} ${parameters}\`**\n\nType **\`${prefix}help\`** for more information.`;
   }
 }
 

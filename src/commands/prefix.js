@@ -11,14 +11,13 @@ export default {
     requireUserConnection: false,
     requireBoundChannel: true,
   },
-  execute: async ({ client, message, args, guildConfig }) => {
-    const prefix = args[0]?.toString();
-
-    if (prefix) {
+  execute: async ({ client, message, command, args, guildConfig }) => {
+    if (args.length > 0) {
+      const prefix = args[0].toString();
       client.db.set(message.guildId, { ...guildConfig, prefix });
       message.react(REACTIONS.OK);
     } else {
-      throw new InvalidCommandException(guildConfig.prefix);
+      throw new InvalidCommandException(message.content.split(' ')[0], command.parameters, guildConfig.prefix);
     }
   },
 };

@@ -8,8 +8,14 @@ export const REACTIONS = {
   FAIL: '❌',
   SAD: '😭',
   JOY: '🥰',
-  LEFT: '◀',
-  RIGHT: '▶',
+};
+
+export const BUTTONS = {
+  LOOP: 'loop',
+  PAUSE: 'pause',
+  STOP: 'stop',
+  PREVIOUS: 'previous',
+  NEXT: 'next',
 };
 
 export const PAGE_SIZE = 10;

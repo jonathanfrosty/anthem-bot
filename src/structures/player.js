@@ -20,6 +20,7 @@ export default class Player {
     this.volume = guildConfig.volume;
     this.seekSeconds = 0;
     this.seeking = false;
+    this.looping = false;
     this.retryCount = 0;
     this.queue = [];
 
@@ -56,12 +57,17 @@ export default class Player {
       .on(AudioPlayerStatus.Idle, async (oldState) => {
         // when the player finishes playing a song
         if (oldState.status !== AudioPlayerStatus.Idle) {
-          await this.currentSong.onFinish();
-          this.currentSong = null;
-          this.audioResource = null;
           this.seekSeconds = 0;
-          this.retryCount = 0;
-          this.processQueue();
+
+          if (this.looping) {
+            this.play();
+          } else {
+            await this.currentSong.onFinish();
+            this.currentSong = null;
+            this.audioResource = null;
+            this.retryCount = 0;
+            this.processQueue();
+          }
         }
       })
       .on(AudioPlayerStatus.Playing, (oldState) => {
@@ -98,6 +104,21 @@ export default class Player {
       return true;
     }
     return false;
+  }
+
+  toggleLoop() {
+    this.looping = !this.looping;
+    return this.looping;
+  }
+
+  togglePause() {
+    if (this.audioPlayer.state.status === AudioPlayerStatus.Paused) {
+      this.resume();
+      return false;
+    }
+
+    this.pause();
+    return true;
   }
 
   /**
@@ -165,6 +186,7 @@ export default class Player {
    * This will cause the next song in the queue to be processed.
    */
   stop() {
+    this.looping = false;
     return this.audioPlayer.stop(true);
   }
 

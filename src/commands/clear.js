@@ -11,9 +11,7 @@ export default {
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
 
-    if (player) {
-      player.clear();
-      message.react(REACTIONS.OK);
-    }
+    player.clear();
+    message.react(REACTIONS.OK);
   },
 };

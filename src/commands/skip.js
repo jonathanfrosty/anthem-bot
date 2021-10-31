@@ -13,7 +13,7 @@ export default {
   execute: async ({ client, message, args }) => {
     const player = client.players.get(message.guildId);
 
-    if (player?.skip(args[0])) {
+    if (player.skip(args[0])) {
       message.react(REACTIONS.OK);
     }
   },

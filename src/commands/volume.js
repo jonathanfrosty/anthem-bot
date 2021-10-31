@@ -1,4 +1,5 @@
 import { DEFAULT_VOLUME, REACTIONS } from '../utilities/constants.js';
+import { InvalidCommandException } from '../utilities/exceptions.js';
 
 export default {
   name: 'volume',
@@ -10,14 +11,17 @@ export default {
     requireUserConnection: true,
     requireBoundChannel: true,
   },
-  execute: async ({ client, message, args, guildConfig }) => {
-    const { guildId } = message;
-    const player = client.players.get(guildId);
-    const volume = player?.setVolume(args[0]);
+  execute: async ({ client, message, command, args, guildConfig }) => {
+    if (args.length > 0) {
+      const player = client.players.get(message.guildId);
+      const volume = player.setVolume(args[0]);
 
-    if (volume !== null) {
-      client.db.set(guildId, { ...guildConfig, volume });
-      message.react(REACTIONS.OK);
+      if (volume !== null) {
+        client.db.set(message.guildId, { ...guildConfig, volume });
+        message.react(REACTIONS.OK);
+      }
+    } else {
+      throw new InvalidCommandException(message.content.split(' ')[0], command.parameters, guildConfig.prefix);
     }
   },
 };
