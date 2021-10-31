@@ -106,11 +106,17 @@ export default class Player {
     return false;
   }
 
+  /**
+   * Toggles the looping state of the current song.
+   */
   toggleLoop() {
     this.looping = !this.looping;
     return this.looping;
   }
 
+  /**
+   * Toggles the paused state of the current song.
+   */
   togglePause() {
     if (this.audioPlayer.state.status === AudioPlayerStatus.Paused) {
       this.resume();
