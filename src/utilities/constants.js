@@ -11,11 +11,11 @@ export const REACTIONS = {
 };
 
 export const BUTTONS = {
-  LOOP: 'loop',
-  PAUSE: 'pause',
-  STOP: 'stop',
-  PREVIOUS: 'previous',
-  NEXT: 'next',
+  LOOP: 'audio_loop',
+  PAUSE: 'audio_pause',
+  STOP: 'audio_stop',
+  PREVIOUS: 'queue_previous',
+  NEXT: 'queue_next',
 };
 
 export const PAGE_SIZE = 10;

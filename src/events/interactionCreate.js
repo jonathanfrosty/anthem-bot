@@ -1,7 +1,7 @@
 import { BUTTONS } from '../utilities/constants.js';
 
 /**
- * Event handler for when message buttons are pressed.
+ * Event handler for when audio control message buttons are pressed.
  */
 export default async (client, interaction) => {
   if (!interaction.isButton()) return;
@@ -9,8 +9,14 @@ export default async (client, interaction) => {
   const { customId, guildId, message } = interaction;
   const player = client.players.get(guildId);
 
-  if (!player) {
-    interaction.update({ components: [] });
+  if (!customId.startsWith('audio')) {
+    return;
+  }
+
+  // check if there is a connected player and that the source message is associated with the current song.
+  // if not, delete the message.
+  if (!player?.isConnected() || interaction.message.id !== player.currentSong?.message.id) {
+    interaction.message.delete();
     return;
   }
 
@@ -28,6 +34,7 @@ export default async (client, interaction) => {
     interaction.update({ components: message.components });
   }
 
+  // this case doesn't require an interaction update as the message will be immediately deleted after stopping the current song
   if (customId === BUTTONS.STOP) {
     player.stop();
   }

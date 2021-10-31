@@ -4,6 +4,7 @@ import { createAudioResource } from '@discordjs/voice';
 import { Constants } from 'discord.js';
 import { queuedEmbed, errorEmbed, playingEmbed, finishedEmbed } from '../utilities/embeds.js';
 import { createActionRow } from '../utilities/buttons.js';
+import { BUTTONS } from '../utilities/constants.js';
 
 /**
  * Song class capable of generating an audio resource from a YouTube url.
@@ -58,7 +59,7 @@ export default class Song {
    * Sends a message to the channel with audio control buttons.
    */
   async sendMessage(content) {
-    const actionRow = createActionRow('loop', 'pause', 'stop');
+    const actionRow = createActionRow(BUTTONS.LOOP, BUTTONS.PAUSE, BUTTONS.STOP);
     return this.channel.send({ ...content, components: [actionRow] });
   }
 

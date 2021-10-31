@@ -27,25 +27,24 @@ const showQueue = async (embeds, channel) => {
   if (embeds.length === 1) {
     channel.send({ embeds: [embeds[0]] });
   } else {
-    let actionRow = createActionRow(BUTTONS.PREVIOUS, BUTTONS.NEXT);
-    actionRow.components.at(0).setDisabled(true);
+    const actionRow = createActionRow(BUTTONS.PREVIOUS, BUTTONS.NEXT);
     const message = await channel.send({ embeds: [embeds[0]], components: [actionRow] });
 
     const filter = (i) => i.customId === BUTTONS.PREVIOUS || i.customId === BUTTONS.NEXT;
-    const collector = message.createMessageComponentCollector({ filter, time: 5e3 });
+    const collector = message.createMessageComponentCollector({ filter, time: 60e3 });
 
     collector.on('collect', async (interaction) => {
-      actionRow = createActionRow(BUTTONS.PREVIOUS, BUTTONS.NEXT);
-
       if (interaction.customId === BUTTONS.PREVIOUS && --page === 0) {
-        actionRow.components.at(0).setDisabled(true);
+        interaction.component.setDisabled(true);
+        interaction.message.resolveComponent(BUTTONS.NEXT).setDisabled(false);
       }
 
       if (interaction.customId === BUTTONS.NEXT && ++page === embeds.length - 1) {
-        actionRow.components.at(1).setDisabled(true);
+        interaction.component.setDisabled(true);
+        interaction.message.resolveComponent(BUTTONS.PREVIOUS).setDisabled(false);
       }
 
-      await interaction.update({ embeds: [embeds[page]], components: [actionRow] });
+      await interaction.update({ embeds: [embeds[page]], components: interaction.message.components });
     });
   }
 };

@@ -7,23 +7,24 @@ export const createActionRow = (...buttonNames) => {
 };
 
 const buttons = {
-  loop: new MessageButton()
+  [BUTTONS.LOOP]: new MessageButton()
     .setCustomId(BUTTONS.LOOP)
     .setLabel('LOOP')
     .setStyle('SECONDARY'),
-  pause: new MessageButton()
+  [BUTTONS.PAUSE]: new MessageButton()
     .setCustomId(BUTTONS.PAUSE)
     .setLabel('PAUSE')
     .setStyle('SECONDARY'),
-  stop: new MessageButton()
+  [BUTTONS.STOP]: new MessageButton()
     .setCustomId(BUTTONS.STOP)
     .setLabel('STOP')
     .setStyle('DANGER'),
-  previous: new MessageButton()
+  [BUTTONS.PREVIOUS]: new MessageButton()
     .setCustomId(BUTTONS.PREVIOUS)
     .setLabel('PREVIOUS')
-    .setStyle('PRIMARY'),
-  next: new MessageButton()
+    .setStyle('PRIMARY')
+    .setDisabled(true),
+  [BUTTONS.NEXT]: new MessageButton()
     .setCustomId(BUTTONS.NEXT)
     .setLabel('NEXT')
     .setStyle('PRIMARY'),
