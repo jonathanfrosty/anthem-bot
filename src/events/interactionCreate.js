@@ -1,3 +1,4 @@
+import { messageButtons } from '../utilities/buttons.js';
 import { BUTTONS } from '../utilities/constants.js';
 
 /**
@@ -8,34 +9,32 @@ export default async (client, interaction) => {
 
   const { customId, guildId, message } = interaction;
   const player = client.players.get(guildId);
-
-  if (!customId.startsWith('audio')) {
-    return;
-  }
+  let newButton;
 
   // check if there is a connected player and that the source message is associated with the current song.
   // if not, delete the message.
-  if (!player?.isConnected() || interaction.message.id !== player.currentSong?.message.id) {
+  if (!player?.isConnected() || (customId.startsWith('audio') && interaction.message.id !== player.currentSong?.message.id)) {
     interaction.message.delete();
     return;
   }
 
   if (customId === BUTTONS.LOOP) {
     const looping = player.toggleLoop();
-    interaction.component.setStyle(looping ? 'PRIMARY' : 'SECONDARY');
-    interaction.component.setLabel(looping ? 'UNLOOP' : 'LOOP');
-    interaction.update({ components: message.components });
+    newButton = messageButtons[BUTTONS.LOOP](looping);
   }
 
   if (customId === BUTTONS.PAUSE) {
     const paused = player.togglePause();
-    interaction.component.setStyle(paused ? 'PRIMARY' : 'SECONDARY');
-    interaction.component.setLabel(paused ? 'RESUME' : 'PAUSE');
-    interaction.update({ components: message.components });
+    newButton = messageButtons[BUTTONS.PAUSE](paused);
   }
 
   // this case doesn't require an interaction update as the message will be immediately deleted after stopping the current song
   if (customId === BUTTONS.STOP) {
     player.stop();
+    return;
   }
+
+  interaction.component.setStyle(newButton.style);
+  interaction.component.setLabel(newButton.label);
+  interaction.update({ components: message.components });
 };

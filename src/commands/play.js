@@ -28,7 +28,7 @@ export default {
           adapterCreator: voice.channel.guild.voiceAdapterCreator,
         });
 
-        player = new Player(voiceConnection, guildConfig);
+        player = new Player(voiceConnection, guildConfig, client);
         client.players.set(guildId, player);
       }
 

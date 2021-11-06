@@ -3,7 +3,7 @@ import ytdl from 'discord-ytdl-core';
 import { createAudioResource } from '@discordjs/voice';
 import { Constants } from 'discord.js';
 import { queuedEmbed, errorEmbed, playingEmbed, finishedEmbed } from '../utilities/embeds.js';
-import { createActionRow } from '../utilities/buttons.js';
+import { createActionRow, messageButtons } from '../utilities/buttons.js';
 import { BUTTONS } from '../utilities/constants.js';
 
 /**
@@ -20,6 +20,7 @@ export default class Song {
     this.channel = channel;
     this.message = null;
     this.error = false;
+    this.timer = null;
   }
 
   createAudioResource(startSeconds, volume) {
@@ -30,23 +31,25 @@ export default class Song {
   }
 
   /**
-   * Update the channel periodically with the elapsed time of the current song,
+   * Updates the channel periodically with the elapsed time of the current song,
    * giving the effect of a real-time progress bar.
-   * Stops updating if the song finishes, the message gets deleted, or the player disconnects.
+   * Stops updating if the song finishes, the message gets deleted/replaced, or the player disconnects.
    */
-  async onStart() {
+  async onStart(isNew = true) {
     try {
       const player = this.channel.client.players.get(this.channel.guildId);
 
       if (player?.isConnected() && player?.currentSong?.id === this.id) {
-        const elapsedSeconds = player.getCurrentSongElapsedSeconds();
-        const content = playingEmbed({ ...this, elapsedSeconds });
+        if (!player.paused || isNew) {
+          const elapsedSeconds = player.getCurrentSongElapsedSeconds();
+          const content = playingEmbed({ ...this, elapsedSeconds });
 
-        this.message = !this.message
-          ? await this.sendMessage(content)
-          : await this.message.edit(content);
+          this.message = isNew
+            ? await this.sendMessage(content, player)
+            : await this.message.edit(content);
+        }
 
-        setTimeout(() => this.onStart(), 5e3);
+        this.timer = setTimeout(() => this.onStart(false), 5e3);
       }
     } catch (error) {
       if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
@@ -56,18 +59,36 @@ export default class Song {
   }
 
   /**
-   * Sends a message to the channel with audio control buttons.
+   * Sends a progress message to the channel with audio control buttons.
    */
-  async sendMessage(content) {
-    const actionRow = createActionRow(BUTTONS.LOOP, BUTTONS.PAUSE, BUTTONS.STOP);
+  async sendMessage(content, player) {
+    const actionRow = createActionRow(
+      messageButtons[BUTTONS.LOOP](player.looping),
+      messageButtons[BUTTONS.PAUSE](player.paused),
+      BUTTONS.STOP,
+    );
     return this.channel.send({ ...content, components: [actionRow] });
   }
 
   /**
-   * Deletes the progress message and signals to the channel that the song has stopped playing, either successfully or due to an error.
+   * Deletes the progress message.
+   */
+  async deleteMessage() {
+    try {
+      clearTimeout(this.timer);
+      await this.message?.delete();
+    } catch (error) {
+      if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+        console.warn(error);
+      }
+    }
+  }
+
+  /**
+   * Signals to the channel that the song has stopped playing, either successfully or due to an error.
    */
   async onFinish() {
-    this.message?.delete().catch(() => {});
+    this.deleteMessage();
 
     const embed = this.error
       ? errorEmbed({ message: `Failed to play \`${this.title}\`` })

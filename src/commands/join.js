@@ -22,7 +22,7 @@ export default {
         adapterCreator: channel.guild.voiceAdapterCreator,
       });
 
-      client.players.set(guildId, new Player(voiceConnection, guildConfig));
+      client.players.set(guildId, new Player(voiceConnection, guildConfig, client));
 
       message.react(REACTIONS.JOY);
     }

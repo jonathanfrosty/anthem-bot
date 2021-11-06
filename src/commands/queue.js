@@ -1,3 +1,4 @@
+import { Constants } from 'discord.js';
 import { createActionRow } from '../utilities/buttons.js';
 import { BUTTONS } from '../utilities/constants.js';
 import { queueEmbeds } from '../utilities/embeds.js';
@@ -13,38 +14,60 @@ export default {
   },
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);
-    const embeds = queueEmbeds(player.queue);
-    showQueue(embeds, message.channel);
+    showQueue(message.channel, player.queue);
   },
 };
 
 /**
  * Send a message to a channel displaying a paginated queue that users can click through for a short time.
  */
-const showQueue = async (embeds, channel) => {
+const showQueue = async (channel, queue, message = null) => {
   let page = 0;
+  let collector = null;
+  const embeds = queueEmbeds(queue);
 
   if (embeds.length === 1) {
-    channel.send({ embeds: [embeds[0]] });
+    message = message
+      ? await message.edit({ embeds: [embeds[0]], components: [] })
+      : await channel.send({ embeds: [embeds[0]] });
   } else {
     const actionRow = createActionRow(BUTTONS.PREVIOUS, BUTTONS.NEXT);
-    const message = await channel.send({ embeds: [embeds[0]], components: [actionRow] });
+
+    message = message
+      ? await message.edit({ embeds: [embeds[0]], components: [actionRow] })
+      : await channel.send({ embeds: [embeds[0]], components: [actionRow] });
 
     const filter = (i) => i.customId === BUTTONS.PREVIOUS || i.customId === BUTTONS.NEXT;
-    const collector = message.createMessageComponentCollector({ filter, time: 60e3 });
+    collector = message.createMessageComponentCollector({ filter, time: 5 * 60e3 });
 
     collector.on('collect', async (interaction) => {
-      if (interaction.customId === BUTTONS.PREVIOUS && --page === 0) {
-        interaction.component.setDisabled(true);
+      if (interaction.customId === BUTTONS.PREVIOUS) {
         interaction.message.resolveComponent(BUTTONS.NEXT).setDisabled(false);
-      }
-
-      if (interaction.customId === BUTTONS.NEXT && ++page === embeds.length - 1) {
-        interaction.component.setDisabled(true);
+        page--;
+      } else if (interaction.customId === BUTTONS.NEXT) {
         interaction.message.resolveComponent(BUTTONS.PREVIOUS).setDisabled(false);
+        page++;
       }
 
+      interaction.component.setDisabled(page === 0 || page === embeds.length - 1);
       await interaction.update({ embeds: [embeds[page]], components: interaction.message.components });
     });
   }
+
+  // if the queue gets updated, call this function again to update the queue message.
+  // if the queue has become empty, delete the queue message.
+  channel.client.once('queueUpdate', async (newQueue) => {
+    collector?.stop();
+    try {
+      if (newQueue.length > 0) {
+        await showQueue(channel, newQueue, message);
+      } else {
+        await message?.delete();
+      }
+    } catch (error) {
+      if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+        console.warn(error);
+      }
+    }
+  });
 };

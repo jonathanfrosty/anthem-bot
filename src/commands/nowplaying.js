@@ -1,5 +1,3 @@
-import { playingEmbed } from '../utilities/embeds.js';
-
 export default {
   name: 'nowplaying',
   aliases: ['np'],
@@ -10,11 +8,11 @@ export default {
     requireBoundChannel: true,
   },
   execute: async ({ client, message }) => {
-    const player = client.players.get(message.guildId);
+    const { currentSong } = client.players.get(message.guildId);
 
-    if (player.currentSong) {
-      const embed = playingEmbed({ ...player.currentSong, showDuration: false });
-      message.channel.send(embed);
+    if (currentSong) {
+      await currentSong.deleteMessage();
+      await currentSong.onStart();
     }
   },
 };

@@ -12,15 +12,17 @@ import { getSeekSeconds } from '../utilities/helpers.js';
  * One Player per voice channel.
  */
 export default class Player {
-  constructor(voiceConnection, guildConfig) {
+  constructor(voiceConnection, guildConfig, client) {
+    this.client = client;
     this.voiceConnection = voiceConnection;
     this.audioPlayer = createAudioPlayer();
     this.audioResource = null;
     this.currentSong = null;
     this.volume = guildConfig.volume;
-    this.seekSeconds = 0;
-    this.seeking = false;
+    this.paused = false;
     this.looping = false;
+    this.seeking = false;
+    this.seekSeconds = 0;
     this.retryCount = 0;
     this.queue = [];
 
@@ -75,7 +77,7 @@ export default class Player {
         if (oldState.status !== AudioPlayerStatus.Paused) {
           if (this.seeking) {
             this.seeking = false;
-          } else {
+          } else if (!this.looping) {
             this.currentSong?.onStart();
           }
         }
@@ -100,6 +102,8 @@ export default class Player {
    */
   leave() {
     if (this.isConnected()) {
+      this.clear();
+      this.audioPlayer.removeAllListeners();
       this.voiceConnection.destroy();
       return true;
     }
@@ -131,14 +135,16 @@ export default class Player {
    * Pause the current song if there is one playing.
    */
   pause() {
-    return this.audioPlayer.pause();
+    this.paused = this.audioPlayer.pause();
+    return this.paused;
   }
 
   /**
    * Resume the current song if it was paused.
    */
   resume() {
-    return this.audioPlayer.unpause();
+    this.paused = !this.audioPlayer.unpause();
+    return this.paused;
   }
 
   /**
@@ -201,6 +207,7 @@ export default class Player {
    */
   clear() {
     this.queue = [];
+    this.emitQueueUpdate();
   }
 
   /**
@@ -263,6 +270,7 @@ export default class Player {
         const secondsUntil = this.calculateSecondsUntil(position);
         songs[0].onQueue(position, secondsUntil);
       }
+      this.emitQueueUpdate();
     } else {
       this.processQueue();
     }
@@ -277,6 +285,7 @@ export default class Player {
     }
 
     this.currentSong = this.queue.shift();
+    this.emitQueueUpdate();
     this.play();
   }
 
@@ -325,5 +334,13 @@ export default class Player {
   getCurrentSongElapsedSeconds() {
     const elapsedSeconds = (this.audioResource?.playbackDuration ?? 0) / 1000;
     return elapsedSeconds + this.seekSeconds;
+  }
+
+  /**
+   * Emits an event with the current queue.
+   * This is for the purpose of updating any queue messages in the text channel.
+   */
+  emitQueueUpdate() {
+    this.client.emit('queueUpdate', this.queue);
   }
 }

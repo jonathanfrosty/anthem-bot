@@ -2,15 +2,13 @@ import { MessageEmbed } from 'discord.js';
 import { COMMANDS_ORDER, DEFAULT_PREFIX, PAGE_SIZE } from './constants.js';
 import { formatTime, getProgressBar } from './helpers.js';
 
-export const playingEmbed = ({ url, title, thumbnail, durationSeconds, elapsedSeconds, showDuration = true }) => {
+export const playingEmbed = ({ url, title, thumbnail, durationSeconds, elapsedSeconds }) => {
   if (!url) {
     return { embeds: [createEmbed({ colour: 'ORANGE', title: '❌   Nothing is currently playing' })] };
   }
 
   const description = `[${title}](${url})`;
-  const fields = showDuration
-    ? [{ name: 'Duration', value: getProgressBar(elapsedSeconds, durationSeconds) }]
-    : [];
+  const fields = [{ name: 'Duration', value: getProgressBar(elapsedSeconds, durationSeconds) }];
   return { embeds: [createEmbed({ title: '🎵   Now playing', description, thumbnail, fields })] };
 };
 
