@@ -12,10 +12,11 @@ export const playingEmbed = ({ url, title, thumbnail, durationSeconds, elapsedSe
   return { embeds: [createEmbed({ title: '🎵   Now playing', description, thumbnail, fields })] };
 };
 
-export const finishedEmbed = (url, title, thumbnail) => {
-  const description = `[${title}](${url})`;
-  return { embeds: [createEmbed({ colour: 'GREEN', title: '✅   Finished playing', description, thumbnail })] };
-};
+export const finishedEmbed = (url, title) => ({
+  embeds: [
+    createEmbed({ colour: 'GREEN', url, title: `✅   ${title}` }),
+  ],
+});
 
 export const queuedEmbed = (url, title, thumbnail, position, secondsUntil) => {
   const description = `[${title}](${url})`;
@@ -111,9 +112,10 @@ export const anthemEmbed = () => ({
   ],
 });
 
-const createEmbed = ({ colour = 'BLUE', title, description = '', thumbnail = '', fields = [], footer = '' }) => new MessageEmbed()
+const createEmbed = ({ colour = 'BLUE', title, url, description = '', thumbnail, fields = [], footer = '' }) => new MessageEmbed()
   .setColor(colour)
   .setTitle(title)
+  .setURL(url)
   .setDescription(description)
   .setThumbnail(thumbnail)
   .addFields(fields)

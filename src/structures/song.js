@@ -92,7 +92,7 @@ export default class Song {
 
     const embed = this.error
       ? errorEmbed({ message: `Failed to play \`${this.title}\`` })
-      : finishedEmbed(this.url, this.title, this.thumbnail);
+      : finishedEmbed(this.url, this.title);
 
     return this.channel.send(embed);
   }
