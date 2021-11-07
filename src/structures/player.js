@@ -198,6 +198,7 @@ export default class Player {
    * This will cause the next song in the queue to be processed.
    */
   stop() {
+    this.paused = false;
     this.looping = false;
     return this.audioPlayer.stop(true);
   }
