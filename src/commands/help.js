@@ -1,7 +1,6 @@
 import { commandsEmbed } from '../utilities/embeds.js';
 
 export default {
-  name: 'help',
   aliases: ['commands'],
   description: 'Displays a list of supported commands with their descriptions and any aliases.',
   options: {

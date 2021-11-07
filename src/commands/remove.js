@@ -2,9 +2,8 @@ import { REACTIONS } from '../utilities/constants.js';
 import { InvalidCommandException } from '../utilities/exceptions.js';
 
 export default {
-  name: 'remove',
-  parameters: '<position>',
   aliases: ['delete'],
+  parameters: '<position>',
   description: 'Removes the song at the given position from the queue.',
   options: {
     requireBotConnection: true,

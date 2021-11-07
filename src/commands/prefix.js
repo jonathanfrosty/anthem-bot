@@ -2,9 +2,8 @@ import { REACTIONS } from '../utilities/constants.js';
 import { InvalidCommandException } from '../utilities/exceptions.js';
 
 export default {
-  name: 'prefix',
-  parameters: '<characters>',
   aliases: ['pre'],
+  parameters: '<characters>',
   description: 'Sets the prefix for all commands.',
   options: {
     requireBotConnection: false,

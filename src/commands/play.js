@@ -6,9 +6,8 @@ import { InvalidCommandException } from '../utilities/exceptions.js';
 import { search } from '../utilities/helpers.js';
 
 export default {
-  name: 'play',
-  parameters: '<url | text>',
   aliases: ['p'],
+  parameters: '<url | text>',
   description: 'Plays song(s).\nProvide a YouTube video/playlist URL or plain text to search YouTube for a song.',
   options: {
     requireBotConnection: false,

@@ -1,7 +1,6 @@
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'clear',
   description: 'Clears the song queue.',
   options: {
     requireBotConnection: true,

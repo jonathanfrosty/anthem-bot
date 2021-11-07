@@ -2,7 +2,6 @@ import { Permissions } from 'discord.js';
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'bind',
   description: 'Binds the bot to a single text channel where commands can be used.\nBy default, any channel will work.',
   options: {
     requireBotConnection: false,

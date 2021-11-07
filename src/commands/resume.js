@@ -1,7 +1,6 @@
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'resume',
   aliases: ['unpause'],
   description: 'Resumes the current song.',
   options: {

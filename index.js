@@ -25,7 +25,7 @@ fs.readdirSync(commandsDir)
   .filter((file) => file.endsWith('.js'))
   .forEach(async (file) => {
     const { default: command } = await import(`${commandsDir}/${file}`);
-    client.commands.set(command.name, command);
+    client.commands.set(file.split('.')[0], command);
   });
 
 // register events

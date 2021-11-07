@@ -2,9 +2,8 @@ import { DEFAULT_VOLUME, REACTIONS } from '../utilities/constants.js';
 import { InvalidCommandException } from '../utilities/exceptions.js';
 
 export default {
-  name: 'volume',
-  parameters: '<0-100>',
   aliases: ['vol'],
+  parameters: '<0-100>',
   description: `Sets the volume as a percentage. Default is ${DEFAULT_VOLUME * 100}.`,
   options: {
     requireBotConnection: true,

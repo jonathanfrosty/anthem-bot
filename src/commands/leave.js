@@ -1,7 +1,6 @@
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'leave',
   aliases: ['dc'],
   description: 'Disconnects the bot from the user\'s voice channel.',
   options: {

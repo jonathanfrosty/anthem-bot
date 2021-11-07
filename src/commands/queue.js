@@ -4,7 +4,6 @@ import { BUTTONS } from '../utilities/constants.js';
 import { queueEmbeds } from '../utilities/embeds.js';
 
 export default {
-  name: 'queue',
   aliases: ['q', 'songs'],
   description: 'Displays all songs in the queue.',
   options: {

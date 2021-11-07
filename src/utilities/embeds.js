@@ -86,8 +86,8 @@ export const queueEmbeds = (items = []) => {
 };
 
 export const commandsEmbed = (collection, prefix) => {
-  const commands = collection.sort((a, b) => COMMANDS_ORDER.indexOf(a.name) - COMMANDS_ORDER.indexOf(b.name)).values();
-  const fields = Array.from(commands, ({ name, parameters, aliases, description }) => {
+  const commands = collection.sort((a, b) => COMMANDS_ORDER.indexOf(a.name) - COMMANDS_ORDER.indexOf(b.name));
+  const fields = Array.from(commands, ([name, { parameters, aliases, description }]) => {
     const aliasesText = aliases?.map((alias) => `\t\`${prefix + alias}\``).join('') ?? '';
     const paramsText = parameters ? ` ${parameters}` : '';
     return {

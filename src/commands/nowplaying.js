@@ -1,5 +1,4 @@
 export default {
-  name: 'nowplaying',
   aliases: ['np'],
   description: 'Displays the current song.',
   options: {

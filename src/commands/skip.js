@@ -1,9 +1,8 @@
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'skip',
-  parameters: '[position]',
   aliases: ['next'],
+  parameters: '[position]',
   description: 'Skips the current song.\nOptionally, provide a number to skip to the song at that position in the queue.',
   options: {
     requireBotConnection: true,

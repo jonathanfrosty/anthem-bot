@@ -3,7 +3,6 @@ import Player from '../structures/player.js';
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'join',
   aliases: ['connect'],
   description: 'Connects the bot to the user\'s voice channel.',
   options: {

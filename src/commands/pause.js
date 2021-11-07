@@ -1,7 +1,6 @@
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
-  name: 'pause',
   description: 'Pauses the current song.',
   options: {
     requireBotConnection: true,

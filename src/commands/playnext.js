@@ -6,9 +6,8 @@ import { InvalidCommandException } from '../utilities/exceptions.js';
 import { search } from '../utilities/helpers.js';
 
 export default {
-  name: 'playnext',
-  parameters: '<url | text>',
   aliases: ['pn'],
+  parameters: '<url | text>',
   description: 'Plays song(s).\nIf there is already a song playing, the song(s) will be placed at the front of the queue.',
   options: {
     requireBotConnection: false,
