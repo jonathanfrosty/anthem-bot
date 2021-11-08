@@ -10,9 +10,10 @@ export default {
   parameters: '<url | text>',
   description: 'Plays song(s).\nProvide a YouTube video/playlist URL or plain text to search YouTube for a song.',
   options: {
-    requireBotConnection: false,
     requireUserConnection: true,
+    requireBotConnection: false,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, command, args, guildConfig }) => {
     const { guildId, channel, member: { voice }, content } = message;

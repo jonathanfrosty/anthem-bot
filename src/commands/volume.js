@@ -6,9 +6,10 @@ export default {
   parameters: '<0-100>',
   description: `Sets the volume as a percentage. Default is ${DEFAULT_VOLUME * 100}.`,
   options: {
-    requireBotConnection: true,
     requireUserConnection: true,
+    requireBotConnection: true,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, command, args, guildConfig }) => {
     if (args.length > 0) {

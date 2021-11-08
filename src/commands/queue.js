@@ -7,9 +7,10 @@ export default {
   aliases: ['q', 'songs'],
   description: 'Displays all songs in the queue.',
   options: {
-    requireBotConnection: true,
     requireUserConnection: true,
+    requireBotConnection: true,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);

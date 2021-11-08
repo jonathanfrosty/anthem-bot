@@ -6,9 +6,10 @@ export default {
   aliases: ['connect'],
   description: 'Connects the bot to the user\'s voice channel.',
   options: {
-    requireBotConnection: false,
     requireUserConnection: true,
+    requireBotConnection: false,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, guildConfig }) => {
     const { guildId, member: { voice: { channel } } } = message;

@@ -4,9 +4,10 @@ import { REACTIONS } from '../utilities/constants.js';
 export default {
   description: 'Binds the bot to a single text channel where commands can be used.\nBy default, any channel will work.',
   options: {
-    requireBotConnection: false,
     requireUserConnection: false,
+    requireBotConnection: false,
     requireBoundChannel: false,
+    requireAudioPlaying: false,
     permissions: [Permissions.FLAGS.ADMINISTRATOR],
   },
   execute: async ({ client, message, guildConfig }) => {

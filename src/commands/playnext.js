@@ -10,9 +10,10 @@ export default {
   parameters: '<url | text>',
   description: 'Plays song(s).\nIf there is already a song playing, the song(s) will be placed at the front of the queue.',
   options: {
-    requireBotConnection: false,
     requireUserConnection: true,
+    requireBotConnection: false,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, command, args, guildConfig }) => {
     const { guildId, channel, member: { voice }, content } = message;

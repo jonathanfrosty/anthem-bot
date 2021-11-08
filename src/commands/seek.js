@@ -5,9 +5,10 @@ export default {
   parameters: '<seconds | mm:ss>',
   description: 'Moves to a time in the current song.\nProvide a number of seconds or a timestamp of the correct form.',
   options: {
-    requireBotConnection: true,
     requireUserConnection: true,
+    requireBotConnection: true,
     requireBoundChannel: true,
+    requireAudioPlaying: true,
   },
   execute: async ({ client, message, command, args, guildConfig }) => {
     if (args.length > 0) {

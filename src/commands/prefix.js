@@ -6,9 +6,10 @@ export default {
   parameters: '<characters>',
   description: 'Sets the prefix for all commands.',
   options: {
-    requireBotConnection: false,
     requireUserConnection: false,
+    requireBotConnection: false,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, command, args, guildConfig }) => {
     if (args.length > 0) {

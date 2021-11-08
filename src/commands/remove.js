@@ -6,9 +6,10 @@ export default {
   parameters: '<position>',
   description: 'Removes the song at the given position from the queue.',
   options: {
-    requireBotConnection: true,
     requireUserConnection: true,
+    requireBotConnection: true,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, command, args, guildConfig }) => {
     if (args.length > 0) {

@@ -4,9 +4,10 @@ export default {
   aliases: ['dc'],
   description: 'Disconnects the bot from the user\'s voice channel.',
   options: {
-    requireBotConnection: true,
     requireUserConnection: true,
+    requireBotConnection: true,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);

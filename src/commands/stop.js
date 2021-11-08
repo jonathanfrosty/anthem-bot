@@ -3,9 +3,10 @@ import { REACTIONS } from '../utilities/constants.js';
 export default {
   description: 'Stops the current song.',
   options: {
-    requireBotConnection: true,
     requireUserConnection: true,
+    requireBotConnection: true,
     requireBoundChannel: true,
+    requireAudioPlaying: true,
   },
   execute: async ({ client, message }) => {
     const player = client.players.get(message.guildId);

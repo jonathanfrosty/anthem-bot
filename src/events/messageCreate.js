@@ -4,6 +4,7 @@ import { errorEmbed } from '../utilities/embeds.js';
 import {
   BotNotConnectedException,
   BotPermissionsException,
+  NoAudioPlayingException,
   UnboundChannelException,
   UserNotConnectedException,
   UserPermissionsException,
@@ -38,9 +39,21 @@ const getGuildConfig = async (client, guildId) => {
  * Validate the bot, user, channel, and command when applicable.
  */
 const validate = (client, guildConfig, command, { guildId, channel, member }) => {
+  const player = client.players.get(guildId);
+
   // check if the bot has permission to use the text channel
   if (!channel.permissionsFor(client.user).has([Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES])) {
     throw new BotPermissionsException();
+  }
+
+  // check if the user is connected to a voice channel
+  if (command.options.requireUserConnection && !member.voice.channel) {
+    throw new UserNotConnectedException();
+  }
+
+  // check if the bot is connected to the user's voice channel
+  if (command.options.requireBotConnection && (!player || player.voiceConnection.joinConfig.channelId !== member.voice.channel?.id)) {
+    throw new BotNotConnectedException();
   }
 
   // check if using the bound channel
@@ -53,14 +66,9 @@ const validate = (client, guildConfig, command, { guildId, channel, member }) =>
     throw new UserPermissionsException();
   }
 
-  // check if the user is connected to a voice channel
-  if (command.options.requireUserConnection && !member.voice.channel) {
-    throw new UserNotConnectedException();
-  }
-
-  // check if the bot is connected to a voice channel
-  if (command.options.requireBotConnection && !client.players.has(guildId)) {
-    throw new BotNotConnectedException();
+  // check if there is currently a song playing
+  if (command.options.requireAudioPlaying && player?.currentSong === null) {
+    throw new NoAudioPlayingException();
   }
 };
 

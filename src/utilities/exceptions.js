@@ -1,7 +1,7 @@
-export class InvalidCommandException {
-  constructor(command, parameters, prefix) {
-    this.name = 'Invalid command usage';
-    this.message = `**\`${command} ${parameters}\`**\n\nType **\`${prefix}help\`** for more information.`;
+export class BotPermissionsException {
+  constructor() {
+    this.name = 'Missing bot permissions';
+    this.message = 'Anthem is not permitted to use this text channel.';
   }
 }
 
@@ -15,7 +15,7 @@ export class UserNotConnectedException {
 export class BotNotConnectedException {
   constructor() {
     this.name = 'Bot not connected';
-    this.message = 'Anthem must be connected to a voice channel to use this command.';
+    this.message = 'Anthem must be connected to your voice channel to use this command.';
   }
 }
 
@@ -33,9 +33,16 @@ export class UserPermissionsException {
   }
 }
 
-export class BotPermissionsException {
+export class NoAudioPlayingException {
   constructor() {
-    this.name = 'Missing bot permissions';
-    this.message = 'Anthem is not permitted to use this text channel.';
+    this.name = 'No audio playing';
+    this.message = 'There must be a song playing to use this command.';
+  }
+}
+
+export class InvalidCommandException {
+  constructor(command, parameters, prefix) {
+    this.name = 'Invalid command usage';
+    this.message = `**\`${command} ${parameters}\`**\n\nType **\`${prefix}help\`** for more information.`;
   }
 }

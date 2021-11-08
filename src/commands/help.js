@@ -4,9 +4,10 @@ export default {
   aliases: ['commands'],
   description: 'Displays a list of supported commands with their descriptions and any aliases.',
   options: {
-    requireBotConnection: false,
     requireUserConnection: false,
+    requireBotConnection: false,
     requireBoundChannel: true,
+    requireAudioPlaying: false,
   },
   execute: async ({ client, message, guildConfig }) => {
     const embed = commandsEmbed(client.commands, guildConfig.prefix);
