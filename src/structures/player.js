@@ -167,7 +167,9 @@ export default class Player {
       && position > 0
       && position <= this.queue.length
     ) {
-      return !!this.queue.splice(position - 1, 1);
+      this.queue.splice(position - 1, 1);
+      this.emitQueueUpdate();
+      return true;
     }
     return false;
   }
