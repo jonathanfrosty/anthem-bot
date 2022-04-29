@@ -20,7 +20,7 @@
     "jsoning": "^0.12.22",
     "tweetnacl": "^1.0.3",
     "uuid": "^8.3.2",
-    "ytdl-core": "^4.10.0"
+    "ytdl-core": "^4.11.0"
   },
   "devDependencies": {
     "eslint": "^8.1.0",

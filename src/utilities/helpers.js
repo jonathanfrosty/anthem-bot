@@ -78,7 +78,7 @@ export const getSeekSeconds = (string, maxSeconds) => {
 
 /**
  * Retrieve YouTube video(s) given either a valid video url, playlist url, or plain text to search YouTube for a video.
- * Will attempt to retry in the case of any errors during this process.
+ * Will attempt to retry (up to 3 times) in the case of any errors during this process.
  */
 export const search = async (args, retryCount = 0) => {
   const firstArg = args[0];
@@ -95,7 +95,7 @@ export const search = async (args, retryCount = 0) => {
       videos[0] = await youtube.getVideo(videoUrl);
     }
   } catch (error) {
-    if (retryCount < 2) {
+    if (retryCount < 3) {
       console.warn(`Error searching for "${args.join(' ')}"\nRetrying... (${++retryCount})\n`, error);
       return search(args, retryCount);
     }
