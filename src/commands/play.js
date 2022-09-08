@@ -6,7 +6,7 @@ import { InvalidCommandException } from '../utilities/exceptions.js';
 import { search } from '../utilities/helpers.js';
 
 export default {
-  aliases: ['p'],
+  aliases: ['p', 'sr'],
   parameters: '<url | text>',
   description: 'Plays song(s).\nProvide a YouTube video/playlist URL or plain text to search YouTube for a song.',
   options: {

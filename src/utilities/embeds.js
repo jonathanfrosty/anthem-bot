@@ -85,16 +85,18 @@ export const queueEmbeds = (items = []) => {
   return embeds;
 };
 
-export const commandsEmbed = (collection, prefix) => {
-  const commands = collection.sort((a, b) => COMMANDS_ORDER.indexOf(a.name) - COMMANDS_ORDER.indexOf(b.name));
+export const commandsEmbed = (commands, prefix) => {
   const fields = Array.from(commands, ([name, { parameters, aliases, description }]) => {
     const aliasesText = aliases?.map((alias) => `\t\`${prefix + alias}\``).join('') ?? '';
     const paramsText = parameters ? ` ${parameters}` : '';
     return {
       name: `\`${prefix + name + paramsText}\`${aliasesText}`,
       value: description,
+      key: name,
     };
   });
+
+  fields.sort((a, b) => COMMANDS_ORDER.indexOf(a.key) - COMMANDS_ORDER.indexOf(b.key));
   return { embeds: [createEmbed({ colour: 'AQUA', title: 'ℹ   Commands', fields })] };
 };
 
@@ -119,4 +121,4 @@ const createEmbed = ({ colour = 'BLUE', title, url, description = '', thumbnail,
   .setDescription(description)
   .setThumbnail(thumbnail)
   .addFields(fields)
-  .setFooter(footer);
+  .setFooter({ text: footer });
