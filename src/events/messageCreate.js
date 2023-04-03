@@ -80,7 +80,7 @@ const validate = (client, guildConfig, command, { guildId, channel, member }) =>
 export default async (client, message) => {
   const { content, guildId, channel, member } = message;
 
-  if (member.user.bot) return;
+  if (member?.user.bot) return;
 
   try {
     const [firstArg, ...args] = content.split(' ');
