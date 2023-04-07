@@ -10,7 +10,7 @@
   "author": "Frosty",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/opus": "^0.6.0",
+    "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.6.0",
     "discord-youtube-api": "^0.1.0",
     "discord-ytdl-core": "^5.0.4",
@@ -20,11 +20,6 @@
     "jsoning": "^0.12.22",
     "tweetnacl": "^1.0.3",
     "uuid": "^8.3.2",
-    "ytdl-core": "^4.11.2"
-  },
-  "devDependencies": {
-    "eslint": "^8.1.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.25.2"
+    "ytdl-core": "^4.9.1"
   }
 }
