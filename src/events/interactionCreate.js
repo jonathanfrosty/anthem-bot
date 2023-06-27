@@ -13,7 +13,10 @@ export default async (client, interaction) => {
 
   // check if there is a connected player and that the source message is associated with the current song.
   // if not, delete the message.
-  if (!player?.isConnected() || (customId.startsWith('audio') && interaction.message.id !== player.currentSong?.message.id)) {
+  if (
+    !player?.isConnected() ||
+    (customId.startsWith('audio') && interaction.message.id !== player.currentSong?.message.id)
+  ) {
     interaction.message.delete();
     return;
   }
@@ -34,7 +37,9 @@ export default async (client, interaction) => {
     return;
   }
 
-  interaction.component.setStyle(newButton.style);
-  interaction.component.setLabel(newButton.label);
-  interaction.update({ components: message.components });
+  if (newButton) {
+    interaction.component.setStyle(newButton.style);
+    interaction.component.setLabel(newButton.label);
+    interaction.update({ components: message.components });
+  }
 };

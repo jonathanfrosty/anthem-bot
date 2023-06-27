@@ -32,7 +32,7 @@ export default {
         client.players.set(guildId, player);
       }
 
-      const videos = await search(args);
+      const videos = await search(args, client.cache);
       const songs = videos.map((video) => Song.create(video, channel));
 
       if (songs.length > 1) {

@@ -67,6 +67,9 @@ export const queueEmbeds = (items = []) => {
   const pages = Math.ceil(items.length / PAGE_SIZE);
   const embeds = [];
 
+  const totalDuration = items.reduce((acc, cur) => acc + cur.durationSeconds, 0);
+  const totalTime = formatTime(totalDuration);
+
   for (let page = 0; page < pages; page++) {
     const pageStart = page * PAGE_SIZE;
     const description = items
@@ -78,7 +81,7 @@ export const queueEmbeds = (items = []) => {
       colour: 'PURPLE',
       title: `🎶   ${title}`,
       description,
-      footer: `Page ${page + 1}/${pages} - ${items.length} song${items.length > 1 ? 's' : ''}`,
+      footer: `Page ${page + 1}/${pages} - ${items.length} song${items.length > 1 ? 's' : ''} - ${totalTime}`,
     }));
   }
 

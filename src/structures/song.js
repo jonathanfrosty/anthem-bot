@@ -24,7 +24,12 @@ export default class Song {
   }
 
   createAudioResource(startSeconds, volume) {
-    const stream = ytdl(this.url, { opusEncoded: true, seek: startSeconds, filter: 'audioonly', highWaterMark: 2 ** 25 });
+    const stream = ytdl(this.url, {
+      opusEncoded: true,
+      seek: startSeconds,
+      filter: 'audioonly',
+      highWaterMark: 2 ** 25,
+    });
     const resource = createAudioResource(stream, { inlineVolume: true });
     resource.volume.setVolume(volume);
     return resource;
@@ -109,14 +114,14 @@ export default class Song {
    * Creates a Song object that is bound to a given text channel.
    */
   static create(video, channel) {
-    const { url, title, thumbnail, durationSeconds } = video;
+    const { videoId, title, thumbnail, duration } = video;
 
     return new Song({
       id: v4(),
-      url,
+      url: `https://youtube.com/watch?v=${videoId}`,
+      durationSeconds: duration.seconds,
       title,
       thumbnail,
-      durationSeconds,
       channel,
     });
   }

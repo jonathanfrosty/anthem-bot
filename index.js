@@ -14,6 +14,7 @@ const client = new Client({
 });
 
 client.db = new Jsoning('store.json');
+client.cache = new Jsoning('cache.json');
 client.commands = new Collection();
 client.players = new Collection();
 

@@ -1,6 +1,7 @@
 node_modules
 .env
 store.json
+cache.json
 
 src/commands/clean.js
 process.json
