@@ -8,7 +8,7 @@ import { search } from '../utilities/helpers.js';
 export default {
   aliases: ['pn'],
   parameters: '<url | text>',
-  description: 'Plays song(s).\nIf there is already a song playing, the song(s) will be placed at the front of the queue.',
+  description: 'Plays song(s).\nIf a song is already playing, the song(s) will be placed at the front of the queue.',
   options: {
     requireUserConnection: true,
     requireBotConnection: false,

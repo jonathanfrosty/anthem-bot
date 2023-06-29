@@ -8,7 +8,7 @@ import { search } from '../utilities/helpers.js';
 export default {
   aliases: ['p', 'sr'],
   parameters: '<url | text>',
-  description: 'Plays song(s).\nProvide a YouTube video/playlist URL or plain text to search YouTube for a song.',
+  description: 'Plays song(s).\nProvide a YouTube or Spotify URL or plain text to search YouTube for a song.',
   options: {
     requireUserConnection: true,
     requireBotConnection: false,

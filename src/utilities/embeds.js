@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { Collection, MessageEmbed } from 'discord.js';
 import { COMMANDS_ORDER, DEFAULT_PREFIX, PAGE_SIZE } from './constants.js';
 import { formatTime, getProgressBar } from './helpers.js';
 
@@ -88,19 +88,23 @@ export const queueEmbeds = (items = []) => {
   return embeds;
 };
 
-export const commandsEmbed = (commands, prefix) => {
-  const fields = Array.from(commands, ([name, { parameters, aliases, description }]) => {
-    const aliasesText = aliases?.map((alias) => `\t\`${prefix + alias}\``).join('') ?? '';
-    const paramsText = parameters ? ` ${parameters}` : '';
-    return {
-      name: `\`${prefix + name + paramsText}\`${aliasesText}`,
-      value: description,
-      key: name,
-    };
-  });
+export const commandsEmbed = (commandsCollection, prefix) => {
+  const fields = Array.from(commandsCollection)
+    .sort(([nameA], [nameB]) => COMMANDS_ORDER.indexOf(nameA) - COMMANDS_ORDER.indexOf(nameB))
+    .reduce((all, [name, { parameters, aliases, description }], i, arr) => {
+      if (!COMMANDS_ORDER.includes(name)) return all;
 
-  fields.sort((a, b) => COMMANDS_ORDER.indexOf(a.key) - COMMANDS_ORDER.indexOf(b.key));
-  return { embeds: [createEmbed({ colour: 'AQUA', title: 'ℹ   Commands', fields })] };
+      const aliasesText = aliases?.map((alias) => `\t\`${prefix + alias}\``).join('') ?? '';
+      const paramsText = parameters ? ` ${parameters}` : '';
+
+      return [...all, {
+        name: `\`${prefix + name + paramsText}\`${aliasesText}`,
+        value: i === arr.length - 1 ? description : description + '\n\u200b',
+        key: name,
+      }];
+    }, []);
+
+  return { embeds: [createEmbed({ colour: 'AQUA', title: '📝   Commands', fields })] };
 };
 
 export const anthemEmbed = () => ({
@@ -109,7 +113,7 @@ export const anthemEmbed = () => ({
       colour: '#e34234',
       title: '🎵   Anthem has joined!   🎵',
       description: `
-        Anthem is a simple bot for playing YouTube audio.\n
+        Anthem is a simple bot for playing YouTube and Spotify audio.\n
         Check out the source code or report any issues [here](https://github.com/jonathanfrosty/anthem-bot).\n
         Type **\`${DEFAULT_PREFIX}help\`** for a list of supported commands.
       `,

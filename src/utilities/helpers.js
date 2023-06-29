@@ -1,15 +1,4 @@
-import yts from 'yt-search';
-import SpotifyWebApi from 'spotify-web-api-node';
-
-const spotify = new SpotifyWebApi({
-  clientId: process.env.SPOTIFY_CLIENT_ID,
-  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-});
-
-spotify.clientCredentialsGrant().then(
-  (data) => spotify.setAccessToken(data.body['access_token']),
-  (err) => console.warn('Something went wrong when retrieving an access token', err),
-);
+import { searchSpotify, searchYouTube } from './api/index.js';
 
 /**
  * Check whether or not a given url is valid.
@@ -75,128 +64,15 @@ export const getSeekSeconds = (string, maxSeconds) => {
 };
 
 /**
- * Get the track/playlist ID from a given Spotify URL.
- */
-const getSpotifyId = (url) => {
-  const items = url.split('/');
-  const lastItem = items[items.length - 1];
-  return lastItem.split('?')[0];
-};
-
-/**
- * Fetch the tracks in a Spotify playlist given a playlist ID.
- */
-const getSpotifyPlaylistTracks = (id) =>
-  spotify.getPlaylistTracks(id, {
-    limit: 25,
-    fields: 'items',
-  });
-
-/**
- * Fetch Spotify track data given a track ID.
- */
-const getSpotifyTrack = (id) => spotify.getTrack(id);
-
-/**
- * Get the playlist ID from a YouTube playlist URL.
- */
-const getPlaylistID = (url) => {
-  var reg = /[&?]list=([a-z0-9_]+)/i;
-  var match = reg.exec(url);
-  return match[1];
-};
-
-/**
- * Get the video ID from a YouTube video URL.
- */
-const getVideoID = (url) => {
-  var reg = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  var match = reg.exec(url);
-  return match[2];
-};
-
-/**
  * Map track data to be cached.
  */
-const mapToCache = (items) =>
+export const mapToCache = (items) =>
   items.map(({ videoId, title, thumbnail, duration: { seconds } }) => ({
     videoId,
     title,
     thumbnail,
     duration: { seconds },
   }));
-
-/**
- * Fetch track data using the Spotify API.
- */
-const searchSpotify = async (input, cache) => {
-  const itemId = getSpotifyId(input);
-
-  if (await cache.has(itemId)) {
-    return cache.get(itemId);
-  }
-
-  let tracks = [];
-
-  if (input.includes('track')) {
-    const { body } = await getSpotifyTrack(itemId);
-    tracks[0] = body;
-  } else if (input.includes('playlist')) {
-    const { body } = await getSpotifyPlaylistTracks(itemId);
-    tracks = body.items.map((item) => item.track);
-  }
-
-  const trackSearchTerms = tracks.map(({ name, artists }) => {
-    const artistNames = artists.map((artist) => artist.name).join(', ');
-    return `${artistNames} - ${name}`.split(' ');
-  });
-
-  const searches = trackSearchTerms.map(async (terms) => (await search(terms))[0]);
-  const results = await Promise.all(searches);
-
-  cache.set(itemId, mapToCache(results));
-
-  return results;
-};
-
-/**
- * Fetch track data using the YouTube API.
- */
-const searchYouTube = async (input, cache) => {
-  const firstArg = input[0];
-
-  // youtube search terms
-  if (!isValidUrl(firstArg)) {
-    return [(await yts(input.join(' '))).videos[0]];
-  }
-
-  let tracks = [];
-  let itemId;
-
-  // playlist
-  if (firstArg.includes('list=')) {
-    itemId = getPlaylistID(firstArg);
-
-    if (await cache.has(itemId)) {
-      return cache.get(itemId);
-    }
-
-    tracks = (await yts({ listId: itemId })).videos;
-  } else {
-    // single video
-    itemId = getVideoID(firstArg);
-
-    if (await cache.has(itemId)) {
-      return cache.get(itemId);
-    }
-
-    tracks[0] = await yts({ videoId: itemId });
-  }
-
-  cache.set(itemId, mapToCache(tracks));
-
-  return tracks;
-};
 
 /**
  * Retrieve YouTube video(s) given either a valid YouTube/Spotify video url, playlist url, or plain text to search YouTube for a video.

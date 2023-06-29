@@ -1,5 +1,5 @@
 export default {
-  aliases: ['np'],
+  aliases: ['np', 'song', 'currentsong', 'currentfuckingsong', 'givemethecurrentsongrightfuckingnowpeasant'],
   description: 'Displays the current song.',
   options: {
     requireUserConnection: true,
