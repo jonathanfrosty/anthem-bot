@@ -55,19 +55,6 @@ export default class Player {
       }
     });
 
-    this.voiceConnection.on('stateChange', (oldState, newState) => {
-      const oldNetworking = Reflect.get(oldState, 'networking');
-      const newNetworking = Reflect.get(newState, 'networking');
-
-      const networkStateChangeHandler = (_, newNetworkState) => {
-        const newUdp = Reflect.get(newNetworkState, 'udp');
-        clearInterval(newUdp?.keepAliveInterval);
-      };
-
-      oldNetworking?.off('stateChange', networkStateChangeHandler);
-      newNetworking?.on('stateChange', networkStateChangeHandler);
-    });
-
     this.audioPlayer
       .on(AudioPlayerStatus.Idle, async (oldState) => {
         // when the player finishes playing a song
@@ -75,13 +62,13 @@ export default class Player {
           this.seekSeconds = 0;
 
           if (this.looping) {
-            this.play();
+            await this.play();
           } else {
             await this.currentSong.onFinish();
             this.currentSong = null;
             this.audioResource = null;
             this.retryCount = 0;
-            this.processQueue();
+            await this.processQueue();
           }
         }
       })
@@ -95,8 +82,8 @@ export default class Player {
           }
         }
       })
-      .on('error', (error) => {
-        this.handleError(error, this.getCurrentSongElapsedSeconds());
+      .on('error', async (error) => {
+        await this.handleError(error, this.getCurrentSongElapsedSeconds());
       });
 
     this.voiceConnection.subscribe(this.audioPlayer);
@@ -229,7 +216,7 @@ export default class Player {
   /**
    * Go to a given timestamp in the current song, provided it is within the bounds of its duration.
    */
-  seek(value) {
+  async seek(value) {
     if (value !== undefined && this.currentSong) {
       let seconds = null;
 
@@ -242,8 +229,7 @@ export default class Player {
       if (seconds !== null) {
         this.seeking = true;
         this.seekSeconds = seconds;
-        this.play(this.seekSeconds);
-        return true;
+        return await this.play(this.seekSeconds);
       }
     }
     return false;
@@ -270,7 +256,7 @@ export default class Player {
    * Push a song onto the queue, or to the front of the queue if @param forceNext is true.
    * If the queue is empty, attempt to process the song immediately.
    */
-  enqueue(songs, forceNext) {
+  async enqueue(songs, forceNext) {
     let position;
 
     if (forceNext) {
@@ -288,33 +274,34 @@ export default class Player {
       }
       this.emitQueueUpdate();
     } else {
-      this.processQueue();
+      await this.processQueue();
     }
   }
 
   /**
    * Process the next song in the queue if there is one, and only if the audio player is inactive.
    */
-  processQueue() {
+  async processQueue() {
     if (this.audioPlayer.state.status !== AudioPlayerStatus.Idle || this.queue.length === 0) {
       return;
     }
 
     this.currentSong = this.queue.shift();
     this.emitQueueUpdate();
-    this.play();
+    await this.play();
   }
 
   /**
    * Begin playing a song from a given timestamp.
    * Will attempt to retry in the case of any errors during this process.
    */
-  play(startSeconds = 0) {
+  async play(startSeconds = 0) {
     try {
-      this.audioResource = this.currentSong.createAudioResource(startSeconds, this.volume);
+      this.audioResource = await this.currentSong.getAudioResource(startSeconds, this.volume);
       this.audioPlayer.play(this.audioResource);
+      return true;
     } catch (error) {
-      this.handleError(error, startSeconds);
+      return await this.handleError(error, startSeconds);
     }
   }
 
@@ -322,17 +309,18 @@ export default class Player {
    * Handle any errors thrown whilst attempting to play an audio resource.
    * If retries are unsuccessful, trigger an error and move onto the next song in the queue.
    */
-  handleError(error, startSeconds) {
+  async handleError(error, startSeconds) {
     if (this.retryCount < 2) {
       console.warn(`Error playing "${this.currentSong?.title}"\nRetrying... (${++this.retryCount})\n`, error);
       if (startSeconds > 0) {
-        this.seek(startSeconds);
+        return await this.seek(startSeconds);
       } else {
-        this.play();
+        return await this.play();
       }
     } else {
       this.currentSong.error = true;
       this.stop();
+      return false;
     }
   }
 

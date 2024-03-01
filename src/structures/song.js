@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import ytdl from 'discord-ytdl-core';
+import { stream } from 'play-dl';
 import { createAudioResource } from '@discordjs/voice';
 import { Constants } from 'discord.js';
 import { queuedEmbed, errorEmbed, playingEmbed, finishedEmbed } from '../utilities/embeds.js';
@@ -23,14 +23,9 @@ export default class Song {
     this.timer = null;
   }
 
-  createAudioResource(startSeconds, volume) {
-    const stream = ytdl(this.url, {
-      opusEncoded: true,
-      seek: startSeconds,
-      filter: 'audioonly',
-      highWaterMark: 2 ** 25,
-    });
-    const resource = createAudioResource(stream, { inlineVolume: true });
+  async getAudioResource(startSeconds, volume) {
+    const { stream: ytStream, type } = await stream(this.url, { seek: startSeconds });
+    const resource = createAudioResource(ytStream, { inlineVolume: true, inputType: type });
     resource.volume.setVolume(volume);
     return resource;
   }

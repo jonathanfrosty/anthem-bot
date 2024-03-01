@@ -95,6 +95,6 @@ export default async (client, message) => {
   } catch (error) {
     channel.send((errorEmbed(error)));
     message.react(REACTIONS.FAIL);
-    console.warn(new Date().toLocaleTimeString(), error);
+    console.warn(new Date().toUTCString(), error);
   }
 };

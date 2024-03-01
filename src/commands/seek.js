@@ -14,7 +14,7 @@ export default {
     if (args.length > 0) {
       const player = client.players.get(message.guildId);
 
-      if (player.seek(args[0])) {
+      if (await player.seek(args[0])) {
         message.react(REACTIONS.OK);
       }
     } else {

@@ -39,7 +39,7 @@ export default {
         await channel.send(playlistEmbed(songs));
       }
 
-      player.enqueue(songs, true);
+      await player.enqueue(songs, true);
     } else {
       throw new InvalidCommandException(content.split(' ')[0], command.parameters, guildConfig.prefix);
     }

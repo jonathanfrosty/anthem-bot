@@ -9,16 +9,6 @@ const spotify = new SpotifyWebApi({
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 });
 
-/**
- * Check if a new access token is required to use the Spotify API; if so, request a new one.
- */
-const verifyCredentials = async () => {
-  if (!nextTokenRefreshTime || nextTokenRefreshTime < Date.now()) {
-    nextTokenRefreshTime = Date.now() + (tokenDurationSeconds - 5) * 1000;
-
-    await requestToken();
-  }
-};
 
 /**
  * Update the Spotify access token and token duration.
@@ -26,14 +16,26 @@ const verifyCredentials = async () => {
 const setTokens = (tokens) => {
   spotify.setAccessToken(tokens.access_token);
   tokenDurationSeconds = tokens.expires_in;
+  nextTokenRefreshTime = Date.now() + (tokenDurationSeconds - 5) * 1000;
 };
 
 /**
  * Request a new Spotify API access token.
  */
 const requestToken = async () => {
+  console.log('Requesting token...')
   const { body } = await spotify.clientCredentialsGrant();
+  console.log('Token fetched.')
   setTokens(body);
+};
+
+/**
+ * Check if a new access token is required to use the Spotify API; if so, request a new one.
+ */
+const verifyCredentials = async () => {
+  if (!nextTokenRefreshTime || nextTokenRefreshTime < Date.now()) {
+    await requestToken();
+  }
 };
 
 /**
