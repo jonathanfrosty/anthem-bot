@@ -11,12 +11,12 @@ import { BUTTONS } from '../utilities/constants.js';
  * Assigned a channel that it will send updates to.
  */
 export default class Song {
-  constructor({ id, url, title, thumbnail, durationSeconds, channel }) {
+  constructor({ id, url, title, thumbnail, durationInSec, channel }) {
     this.id = id;
     this.url = url;
     this.title = title;
     this.thumbnail = thumbnail;
-    this.durationSeconds = durationSeconds;
+    this.durationInSec = durationInSec;
     this.channel = channel;
     this.message = null;
     this.error = false;
@@ -109,14 +109,9 @@ export default class Song {
    * Creates a Song object that is bound to a given text channel.
    */
   static create(video, channel) {
-    const { videoId, title, thumbnail, duration } = video;
-
     return new Song({
+      ...video,
       id: v4(),
-      url: `https://youtube.com/watch?v=${videoId}`,
-      durationSeconds: duration.seconds,
-      title,
-      thumbnail,
       channel,
     });
   }

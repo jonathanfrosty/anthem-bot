@@ -67,11 +67,11 @@ export const getSeekSeconds = (string, maxSeconds) => {
  * Map track data to be cached.
  */
 export const mapToCache = (items) =>
-  items.map(({ videoId, title, thumbnail, duration: { seconds } }) => ({
-    videoId,
+  items.map(({ url, title, thumbnail, durationInSec }) => ({
+    url,
     title,
     thumbnail,
-    duration: { seconds },
+    durationInSec,
   }));
 
 /**

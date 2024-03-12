@@ -1,5 +1,5 @@
-import yts from 'yt-search';
-import { isValidUrl, mapToCache } from '../helpers.js';
+import { search, video_info, playlist_info } from 'play-dl'
+import { isValidUrl } from '../helpers.js';
 
 /**
  * Get the playlist ID from a YouTube playlist URL.
@@ -20,6 +20,26 @@ const getVideoID = (url) => {
 };
 
 /**
+ * Get the thumbnail with the highest resolution.
+ */
+const getBestThumbnail = (thumbnails) =>
+  thumbnails.reduce((acc, cur) => {
+    if (cur.width + cur.height > acc.width + acc.height) return cur;
+    return acc;
+  }, thumbnails[0]).url;
+
+/**
+ * Map videos with additional properties.
+ */
+const mapVideos = (videos) => 
+  videos.map(({ url, title, durationInSec, thumbnails}) => ({
+    url,
+    title,
+    durationInSec,
+    thumbnail: getBestThumbnail(thumbnails),
+  }));
+
+/**
  * Fetch track data using the YouTube API.
  */
 export const searchYouTube = async (input, cache) => {
@@ -27,33 +47,27 @@ export const searchYouTube = async (input, cache) => {
 
   // youtube search terms
   if (!isValidUrl(firstArg)) {
-    return [(await yts(input.join(' '))).videos[0]];
+    return mapVideos(await search(input.join(' '), { limit: 1, source: { youtube: 'video' } }));
   }
 
   let tracks = [];
   let itemId;
 
   // playlist
-  if (firstArg.includes('list=')) {
+  if (firstArg.includes('playlist')) {
     itemId = getPlaylistID(firstArg);
-
-    if (await cache.has(itemId)) {
-      return cache.get(itemId);
-    }
-
-    tracks = (await yts({ listId: itemId })).videos;
+    if (await cache.has(itemId)) return await cache.get(itemId);
+    const { videos } = await playlist_info(firstArg);
+    tracks = videos;
   } else {
     // single video
     itemId = getVideoID(firstArg);
-
-    if (await cache.has(itemId)) {
-      return cache.get(itemId);
-    }
-
-    tracks[0] = await yts({ videoId: itemId });
+    if (await cache.has(itemId)) return await cache.get(itemId);
+    const { video_details } = await video_info(firstArg)
+    tracks = [video_details];
   }
 
-  cache.set(itemId, mapToCache(tracks));
-
+  tracks = mapVideos(tracks);
+  cache.set(itemId, tracks);
   return tracks;
 };

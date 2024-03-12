@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "nodemon index.js --ignore *.json",
     "start": "node --experimental-modules ."
   },
   "type": "module",
@@ -20,8 +20,7 @@
     "play-dl": "^1.9.7",
     "spotify-web-api-node": "^5.0.2",
     "tweetnacl": "^1.0.3",
-    "uuid": "^8.3.2",
-    "yt-search": "^2.10.4"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

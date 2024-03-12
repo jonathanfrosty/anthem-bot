@@ -1,14 +1,14 @@
-import { Collection, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { COMMANDS_ORDER, DEFAULT_PREFIX, PAGE_SIZE } from './constants.js';
 import { formatTime, getProgressBar } from './helpers.js';
 
-export const playingEmbed = ({ url, title, thumbnail, durationSeconds, elapsedSeconds }) => {
+export const playingEmbed = ({ url, title, thumbnail, durationInSec, elapsedSeconds }) => {
   if (!url) {
     return { embeds: [createEmbed({ colour: 'ORANGE', title: '❌   Nothing is currently playing' })] };
   }
 
   const description = `[${title}](${url})`;
-  const fields = [{ name: 'Duration', value: getProgressBar(elapsedSeconds, durationSeconds) }];
+  const fields = [{ name: 'Duration', value: getProgressBar(elapsedSeconds, durationInSec) }];
   return { embeds: [createEmbed({ title: '🎵   Now playing', description, thumbnail, fields })] };
 };
 
@@ -31,7 +31,7 @@ export const playlistEmbed = (songs) => {
   const songList = songs.slice(0, PAGE_SIZE).map(({ title, url }) => `[${title}](${url})`).join('\n');
   const description = songs.length > PAGE_SIZE ? `${songList}\n...and ${songs.length - PAGE_SIZE} more` : songList;
   const fields = [
-    { name: 'Total duration', value: `\`${formatTime(songs.reduce((total, video) => total + video.durationSeconds, 0))}\`` },
+    { name: 'Total duration', value: `\`${formatTime(songs.reduce((total, video) => total + video.durationInSec, 0))}\`` },
   ];
 
   return {
@@ -67,14 +67,14 @@ export const queueEmbeds = (items = []) => {
   const pages = Math.ceil(items.length / PAGE_SIZE);
   const embeds = [];
 
-  const totalDuration = items.reduce((acc, cur) => acc + cur.durationSeconds, 0);
+  const totalDuration = items.reduce((acc, cur) => acc + cur.durationInSec, 0);
   const totalTime = formatTime(totalDuration);
 
   for (let page = 0; page < pages; page++) {
     const pageStart = page * PAGE_SIZE;
     const description = items
       .slice(pageStart, pageStart + PAGE_SIZE)
-      .map((item, index) => `**${pageStart + index + 1}**. [${item.title}](${item.url})\nDuration \`${formatTime(item.durationSeconds)}\``)
+      .map((item, index) => `**${pageStart + index + 1}**. [${item.title}](${item.url})\nDuration \`${formatTime(item.durationInSec)}\``)
       .join('\n\n');
 
     embeds.push(createEmbed({

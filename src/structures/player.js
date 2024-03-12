@@ -220,10 +220,10 @@ export default class Player {
     if (value !== undefined && this.currentSong) {
       let seconds = null;
 
-      if (!Number.isNaN(+value) && value >= 0 && value < this.currentSong.durationSeconds) {
+      if (!Number.isNaN(+value) && value >= 0 && value < this.currentSong.durationInSec) {
         seconds = +value;
       } else if (value.includes(':')) {
-        seconds = getSeekSeconds(value, this.currentSong.durationSeconds);
+        seconds = getSeekSeconds(value, this.currentSong.durationInSec);
       }
 
       if (seconds !== null) {
@@ -328,8 +328,8 @@ export default class Player {
    * Calculate the number of seconds until a song at a given position in the queue will be played.
    */
   calculateSecondsUntil(position) {
-    const currentSongRemainingSeconds = this.currentSong.durationSeconds - this.getCurrentSongElapsedSeconds();
-    return this.queue.reduce((total, song, i) => ((i < position - 1) ? total + song.durationSeconds : total), currentSongRemainingSeconds);
+    const currentSongRemainingSeconds = this.currentSong.durationInSec - this.getCurrentSongElapsedSeconds();
+    return this.queue.reduce((total, song, i) => ((i < position - 1) ? total + song.durationInSec : total), currentSongRemainingSeconds);
   }
 
   /**
