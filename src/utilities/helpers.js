@@ -47,20 +47,20 @@ export const getProgressBar = (elapsed, total) => {
 };
 
 /**
- * Get the number of seconds from a string of the form "mm:ss", ensuring it is within the given range.
- * For example, "12:42" (12 minutes 42 seconds).
+ * Get the number of seconds from a string of the form "hours:minutes:seconds", ensuring it is within the given range.
+ * For example, "1:12:42" (1hour 12minutes 42seconds).
  */
 export const getSeekSeconds = (string, maxSeconds) => {
-  const rgx = /(\d*):(\d*)/;
-  const [, mins, secs] = rgx.exec(string);
+  const [secs, mins, hrs] = string.split(":").reverse()
+  const seconds = secs && !Number.isNaN(+secs) ? +secs : 0;
+  const minutes = mins && !Number.isNaN(+mins) ? +mins : 0;
+  const hours   =  hrs && !Number.isNaN(+hrs)  ?  +hrs : 0;
 
-  if (!mins) return null;
+  const totalSeconds = (hours * 60 * 60) + (minutes * 60) + seconds;
 
-  const seconds = +mins * 60 + +secs;
+  if (totalSeconds < 0 || totalSeconds > maxSeconds) return null;
 
-  if (seconds < 0 || seconds > maxSeconds) return null;
-
-  return seconds;
+  return Math.min(totalSeconds, maxSeconds - 0.1);
 };
 
 /**

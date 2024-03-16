@@ -217,14 +217,8 @@ export default class Player {
    * Go to a given timestamp in the current song, provided it is within the bounds of its duration.
    */
   async seek(value) {
-    if (value !== undefined && this.currentSong) {
-      let seconds = null;
-
-      if (!Number.isNaN(+value) && value >= 0 && value < this.currentSong.durationInSec) {
-        seconds = +value;
-      } else if (value.includes(':')) {
-        seconds = getSeekSeconds(value, this.currentSong.durationInSec);
-      }
+    if (value && this.currentSong) {
+      const seconds = getSeekSeconds(value.toString(), this.currentSong.durationInSec);
 
       if (seconds !== null) {
         this.seeking = true;
