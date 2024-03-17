@@ -1,5 +1,4 @@
-import { Constants } from 'discord.js';
-import { createActionRow } from '../utilities/buttons.js';
+import { createActionRow, messageButtons } from '../utilities/buttons.js';
 import { BUTTONS } from '../utilities/constants.js';
 import { queueEmbeds } from '../utilities/embeds.js';
 
@@ -42,15 +41,17 @@ const showQueue = async (channel, queue, message = null) => {
 
     collector.on('collect', async (interaction) => {
       if (interaction.customId === BUTTONS.PREVIOUS) {
-        interaction.message.resolveComponent(BUTTONS.NEXT).setDisabled(false);
         page--;
       } else if (interaction.customId === BUTTONS.NEXT) {
-        interaction.message.resolveComponent(BUTTONS.PREVIOUS).setDisabled(false);
         page++;
       }
 
-      interaction.component.setDisabled(page === 0 || page === embeds.length - 1);
-      await interaction.update({ embeds: [embeds[page]], components: interaction.message.components });
+      const updatedActionRow = createActionRow(
+        messageButtons[BUTTONS.PREVIOUS](page === 0),
+        messageButtons[BUTTONS.NEXT](page === embeds.length - 1)
+      );
+
+      await interaction.update({ embeds: [embeds[page]], components: [updatedActionRow] });
     });
   }
 
@@ -65,7 +66,7 @@ const showQueue = async (channel, queue, message = null) => {
         await message?.delete();
       }
     } catch (error) {
-      if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+      if (error.code !== 10008) {
         console.warn(error);
       }
     }

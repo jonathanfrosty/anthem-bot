@@ -1,4 +1,4 @@
-import { Permissions } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 import { REACTIONS } from '../utilities/constants.js';
 
 export default {
@@ -8,7 +8,7 @@ export default {
     requireBotConnection: false,
     requireBoundChannel: false,
     requireAudioPlaying: false,
-    permissions: [Permissions.FLAGS.ADMINISTRATOR],
+    permissions: [PermissionFlagsBits.Administrator],
   },
   execute: async ({ client, message, guildConfig }) => {
     client.db.set(message.guildId, {

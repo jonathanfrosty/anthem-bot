@@ -1,10 +1,10 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { COMMANDS_ORDER, DEFAULT_PREFIX, PAGE_SIZE } from './constants.js';
 import { formatTime, getProgressBar } from './helpers.js';
 
 export const playingEmbed = ({ url, title, thumbnail, durationInSec, elapsedSeconds }) => {
   if (!url) {
-    return { embeds: [createEmbed({ colour: 'ORANGE', title: '❌   Nothing is currently playing' })] };
+    return { embeds: [createEmbed({ colour: 'Orange', title: '❌   Nothing is currently playing' })] };
   }
 
   const description = `[${title}](${url})`;
@@ -14,7 +14,7 @@ export const playingEmbed = ({ url, title, thumbnail, durationInSec, elapsedSeco
 
 export const finishedEmbed = (url, title) => ({
   embeds: [
-    createEmbed({ colour: 'GREEN', url, title: `✅   ${title}` }),
+    createEmbed({ colour: 'Green', url, title: `✅   ${title}` }),
   ],
 });
 
@@ -24,7 +24,7 @@ export const queuedEmbed = (url, title, thumbnail, position, secondsUntil) => {
     { name: 'Position', value: `\`${position}\``, inline: true },
     { name: 'Time until', value: `\`${formatTime(secondsUntil)}\``, inline: true },
   ];
-  return { embeds: [createEmbed({ colour: 'BLURPLE', title: '🎵   Added to queue', description, thumbnail, fields })] };
+  return { embeds: [createEmbed({ colour: 'Blurple', title: '🎵   Added to queue', description, thumbnail, fields })] };
 };
 
 export const playlistEmbed = (songs) => {
@@ -37,7 +37,7 @@ export const playlistEmbed = (songs) => {
   return {
     embeds: [
       createEmbed({
-        colour: 'BLURPLE',
+        colour: 'Blurple',
         title: `🎶   Playlist of ${songs.length} songs added`,
         description,
         thumbnail: songs[0].thumbnail,
@@ -50,7 +50,7 @@ export const playlistEmbed = (songs) => {
 export const errorEmbed = ({ name = 'An error occurred', message }) => ({
   embeds: [
     createEmbed({
-      colour: 'RED',
+      colour: 'Red',
       title: `⚠️   ${name}`,
       description: message ?? 'Failed to play audio.',
     }),
@@ -61,7 +61,7 @@ export const queueEmbeds = (items = []) => {
   const title = 'Queue';
 
   if (items.length === 0) {
-    return [createEmbed({ colour: 'PURPLE', title: `🎶   ${title}`, description: `${title} is empty.` })];
+    return [createEmbed({ colour: 'Purple', title: `🎶   ${title}`, description: `${title} is empty.` })];
   }
 
   const pages = Math.ceil(items.length / PAGE_SIZE);
@@ -78,7 +78,7 @@ export const queueEmbeds = (items = []) => {
       .join('\n\n');
 
     embeds.push(createEmbed({
-      colour: 'PURPLE',
+      colour: 'Purple',
       title: `🎶   ${title}`,
       description,
       footer: `Page ${page + 1}/${pages} - ${items.length} song${items.length > 1 ? 's' : ''} - ${totalTime}`,
@@ -104,7 +104,7 @@ export const commandsEmbed = (commandsCollection, prefix) => {
       }];
     }, []);
 
-  return { embeds: [createEmbed({ colour: 'AQUA', title: '📝   Commands', fields })] };
+  return { embeds: [createEmbed({ colour: 'Aqua', title: '📝   Commands', fields })] };
 };
 
 export const anthemEmbed = () => ({
@@ -121,11 +121,12 @@ export const anthemEmbed = () => ({
   ],
 });
 
-const createEmbed = ({ colour = 'BLUE', title, url, description = '', thumbnail, fields = [], footer = '' }) => new MessageEmbed()
-  .setColor(colour)
-  .setTitle(title)
-  .setURL(url)
-  .setDescription(description)
-  .setThumbnail(thumbnail)
-  .addFields(fields)
-  .setFooter({ text: footer });
+const createEmbed = ({ colour = 'Blue', title, url, description = null, thumbnail, fields = [], footer = null }) =>
+  new EmbedBuilder()
+    .setColor(colour)
+    .setTitle(title)
+    .setURL(url)
+    .setDescription(description)
+    .setThumbnail(thumbnail)
+    .addFields(fields)
+    .setFooter(footer && { text: footer });

@@ -1,31 +1,32 @@
-import { MessageActionRow, MessageButton } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder } from 'discord.js';
 import { BUTTONS } from './constants.js';
 
 export const createActionRow = (...buttons) => {
   const components = buttons.map((button) => (typeof button === 'string' ? messageButtons[button]() : button));
-  return new MessageActionRow().addComponents(...components);
+  return new ActionRowBuilder().addComponents(...components);
 };
 
 export const messageButtons = {
-  [BUTTONS.LOOP]: (active) => new MessageButton()
+  [BUTTONS.LOOP]: (active) => new ButtonBuilder()
     .setCustomId(BUTTONS.LOOP)
     .setLabel(active ? 'UNLOOP' : 'LOOP')
-    .setStyle(active ? 'PRIMARY' : 'SECONDARY'),
-  [BUTTONS.PAUSE]: (active) => new MessageButton()
+    .setStyle(active ? 'Primary' : 'Secondary'),
+  [BUTTONS.PAUSE]: (active) => new ButtonBuilder()
     .setCustomId(BUTTONS.PAUSE)
     .setLabel(active ? 'RESUME' : 'PAUSE')
-    .setStyle(active ? 'PRIMARY' : 'SECONDARY'),
-  [BUTTONS.STOP]: () => new MessageButton()
+    .setStyle(active ? 'Primary' : 'Secondary'),
+  [BUTTONS.STOP]: () => new ButtonBuilder()
     .setCustomId(BUTTONS.STOP)
     .setLabel('STOP')
-    .setStyle('DANGER'),
-  [BUTTONS.PREVIOUS]: () => new MessageButton()
+    .setStyle('Danger'),
+  [BUTTONS.PREVIOUS]: (disabled = true) => new ButtonBuilder()
     .setCustomId(BUTTONS.PREVIOUS)
     .setLabel('PREVIOUS')
-    .setStyle('PRIMARY')
-    .setDisabled(true),
-  [BUTTONS.NEXT]: () => new MessageButton()
+    .setStyle('Primary')
+    .setDisabled(disabled),
+  [BUTTONS.NEXT]: (disabled = false) => new ButtonBuilder()
     .setCustomId(BUTTONS.NEXT)
     .setLabel('NEXT')
-    .setStyle('PRIMARY'),
+    .setStyle('Primary')
+    .setDisabled(disabled),
 };

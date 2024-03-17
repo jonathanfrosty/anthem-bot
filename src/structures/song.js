@@ -1,7 +1,6 @@
 import { v4 } from 'uuid';
 import { stream } from 'play-dl';
 import { createAudioResource } from '@discordjs/voice';
-import { Constants } from 'discord.js';
 import { queuedEmbed, errorEmbed, playingEmbed, finishedEmbed } from '../utilities/embeds.js';
 import { createActionRow, messageButtons } from '../utilities/buttons.js';
 import { BUTTONS } from '../utilities/constants.js';
@@ -52,7 +51,7 @@ export default class Song {
         this.timer = setTimeout(() => this.onStart(false), 5e3);
       }
     } catch (error) {
-      if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+      if (error.code !== 10008) { // Unknown message
         console.warn(error);
       }
     }
@@ -78,7 +77,7 @@ export default class Song {
       clearTimeout(this.timer);
       await this.message?.delete();
     } catch (error) {
-      if (error.code !== Constants.APIErrors.UNKNOWN_MESSAGE) {
+      if (error.code !== 10008) {
         console.warn(error);
       }
     }

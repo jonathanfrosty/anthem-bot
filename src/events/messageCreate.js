@@ -1,4 +1,4 @@
-import { Permissions } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 import { DEFAULT_PREFIX, DEFAULT_VOLUME, REACTIONS } from '../utilities/constants.js';
 import { errorEmbed } from '../utilities/embeds.js';
 import {
@@ -42,7 +42,7 @@ const validate = (client, guildConfig, command, { guildId, channel, member }) =>
   const player = client.players.get(guildId);
 
   // check if the bot has permission to use the text channel
-  if (!channel.permissionsFor(client.user).has([Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES])) {
+  if (!channel.permissionsFor(client.user).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) {
     throw new BotPermissionsException();
   }
 
@@ -78,9 +78,9 @@ const validate = (client, guildConfig, command, { guildId, channel, member }) =>
  * Send a message back and react to the user message to indicate either success or failure.
  */
 export default async (client, message) => {
-  const { content, guildId, channel, member } = message;
+  const { content, guildId, channel, author } = message;
 
-  if (member?.user.bot) return;
+  if (author.bot) return;
 
   try {
     const [firstArg, ...args] = content.split(' ');
