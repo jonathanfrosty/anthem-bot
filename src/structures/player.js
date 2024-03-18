@@ -72,15 +72,12 @@ export default class Player {
           }
         }
       })
-      .on(AudioPlayerStatus.Playing, (oldState) => {
-        // when the player starts (not resumes) playing a song
-        if (oldState.status !== AudioPlayerStatus.Paused) {
-          if (this.seeking) {
-            this.seeking = false;
-          } else if (!this.looping) {
-            this.currentSong?.onStart();
+      .on(AudioPlayerStatus.Playing, () => {
+        if (this.seeking) {
+          this.seeking = false;
+        } else if (!this.looping && !this.currentSong?.message) {
+          this.currentSong?.onStart();
           }
-        }
       })
       .on('error', async (error) => {
         await this.handleError(error, this.getCurrentSongElapsedSeconds());
