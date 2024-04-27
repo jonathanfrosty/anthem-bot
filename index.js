@@ -12,6 +12,9 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.MessageContent,
   ],
+  presence: {
+    activities: [{ name: 'certified bangers' }]
+  },
 });
 
 client.db = new Jsoning('store.json');
