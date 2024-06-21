@@ -290,6 +290,7 @@ export default class Player {
     try {
       this.audioResource = await this.currentSong.getAudioResource(startSeconds, this.volume);
       this.audioPlayer.play(this.audioResource);
+      await entersState(this.audioPlayer, AudioPlayerStatus.Playing, 5000);
       return true;
     } catch (error) {
       return await this.handleError(error, startSeconds);
